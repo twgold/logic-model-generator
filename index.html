@@ -1,0 +1,3227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Model Generator</title>
+    <style>
+        :root {
+            --primary: #1a5276;
+            --primary-light: #2980b9;
+            --accent: #e67e22;
+            --accent-light: #f39c12;
+            --success: #27ae60;
+            --bg: #f0f4f8;
+            --card: #ffffff;
+            --text: #2c3e50;
+            --text-light: #7f8c8d;
+            --border: #dce1e6;
+            --input-bg: #f8fafc;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --radius: 12px;
+            --ai-purple: #7c3aed;
+            --ai-purple-light: #a78bfa;
+            --ai-purple-bg: #f5f3ff;
+            --ai-sidebar-width: 360px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 2rem 2rem 1.5rem;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .header p { opacity: 0.85; font-size: 0.95rem; }
+
+        /* PROGRESS */
+        .progress-container {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 30px;
+            right: 30px;
+            height: 3px;
+            background: var(--border);
+        }
+        .progress-line {
+            position: absolute;
+            top: 15px;
+            left: 30px;
+            height: 3px;
+            background: var(--accent);
+            transition: width 0.5s ease;
+        }
+        .step-dot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+            cursor: pointer;
+        }
+        .step-dot .dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-light);
+            transition: all 0.3s;
+        }
+        .step-dot.active .dot {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.15);
+        }
+        .step-dot.completed .dot {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .step-dot .step-label {
+            font-size: 0.65rem;
+            margin-top: 0.4rem;
+            color: var(--text-light);
+            text-align: center;
+            max-width: 70px;
+            line-height: 1.2;
+        }
+        .step-dot.active .step-label { color: var(--accent); font-weight: 600; }
+
+        /* MAIN CONTENT */
+        .main { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; }
+
+        /* CARDS */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .card-header h2 { font-size: 1.3rem; font-weight: 700; }
+        .card-desc {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            padding-left: 52px;
+        }
+
+        /* FORM ELEMENTS */
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+        .form-group .hint {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.4rem;
+            font-style: italic;
+        }
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: var(--input-bg);
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        /* CHECKBOX GROUP */
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 0.9rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 400;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            background: var(--input-bg);
+        }
+        .checkbox-group label:hover { border-color: var(--primary-light); }
+        .checkbox-group label.checked {
+            border-color: var(--primary-light);
+            background: rgba(41, 128, 185, 0.08);
+        }
+        .checkbox-group input[type="checkbox"] { accent-color: var(--primary-light); }
+
+        /* DYNAMIC LIST */
+        .dynamic-list { margin-top: 0.5rem; }
+        .dynamic-list .list-item {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .dynamic-list .list-item input { flex: 1; }
+        .dynamic-list .remove-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: #fee;
+            color: #c0392b;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            align-self: center;
+        }
+        .add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--primary-light);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .add-btn:hover { border-color: var(--primary-light); background: rgba(41,128,185,0.05); }
+
+        /* NAVIGATION */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+        .btn {
+            padding: 0.75rem 1.8rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-primary:hover { background: #d35400; }
+        .btn-secondary {
+            background: white;
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+        .btn-secondary:hover { border-color: var(--primary-light); color: var(--primary-light); }
+        .btn-generate {
+            background: linear-gradient(135deg, var(--success) 0%, #2ecc71 100%);
+            color: white;
+            padding: 1rem 2.5rem;
+            font-size: 1.05rem;
+        }
+        .btn-generate:hover { filter: brightness(0.95); }
+
+        /* SECTION PAGES */
+        .section-page { display: none; }
+        .section-page.active { display: block; }
+
+        /* WELCOME */
+        .welcome-hero {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+        .welcome-hero h2 { font-size: 1.6rem; margin-bottom: 0.5rem; }
+        .welcome-hero p { color: var(--text-light); max-width: 550px; margin: 0 auto 2rem; }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .feature-item {
+            text-align: center;
+            padding: 1.2rem;
+            border-radius: var(--radius);
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+        }
+        .feature-item .fi-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .feature-item h4 { font-size: 0.9rem; margin-bottom: 0.3rem; }
+        .feature-item p { font-size: 0.8rem; color: var(--text-light); }
+
+        /* RESULTS PAGE */
+        .results-container { display: none; }
+        .results-container.active { display: block; }
+
+        /* LOGIC MODEL VISUAL */
+        .logic-model-output {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .lm-title {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+        .lm-subtitle {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+        .lm-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .lm-col {
+            border-right: 1px solid var(--border);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+        .lm-col:last-child { border-right: none; }
+        .lm-col-header {
+            padding: 0.7rem 0.5rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .lm-col-question {
+            text-align: center;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.8);
+            font-style: italic;
+            padding: 0 0.3rem 0.5rem;
+        }
+        .lm-col:nth-child(1) .lm-col-header,
+        .lm-col:nth-child(1) .lm-col-question { background: #1a5276; }
+        .lm-col:nth-child(2) .lm-col-header,
+        .lm-col:nth-child(2) .lm-col-question { background: #2471a3; }
+        .lm-col:nth-child(3) .lm-col-header,
+        .lm-col:nth-child(3) .lm-col-question { background: #2e86c1; }
+        .lm-col:nth-child(4) .lm-col-header,
+        .lm-col:nth-child(4) .lm-col-question { background: #e67e22; }
+        .lm-col:nth-child(5) .lm-col-header,
+        .lm-col:nth-child(5) .lm-col-question { background: #d35400; }
+        .lm-col:nth-child(6) .lm-col-header,
+        .lm-col:nth-child(6) .lm-col-question { background: #27ae60; }
+        .lm-col-body {
+            padding: 0.6rem;
+            flex: 1;
+        }
+        .lm-col-body ul {
+            list-style: none;
+            padding: 0;
+        }
+        .lm-col-body li {
+            font-size: 0.72rem;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            line-height: 1.35;
+        }
+        .lm-col-body li:last-child { border-bottom: none; }
+        .lm-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--primary-light);
+            padding: 0 0.2rem;
+        }
+
+        /* THEORY OF CHANGE */
+        .toc-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8f4f8 100%);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        .toc-box h3 { font-size: 1rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .toc-box p { font-size: 0.9rem; line-height: 1.7; }
+
+        /* DETAIL SECTIONS */
+        .detail-section {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1rem;
+        }
+        .detail-section h3 {
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+        }
+        .detail-section h3 .toggle { transition: transform 0.2s; }
+        .detail-section h3 .toggle.open { transform: rotate(90deg); }
+        .detail-content { font-size: 0.9rem; }
+        .detail-content ul { padding-left: 1.2rem; }
+        .detail-content li { margin-bottom: 0.4rem; }
+
+        /* MEASUREMENT SUGGESTIONS */
+        .measure-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+        .measure-card h4 {
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+        .measure-card .measure-type {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+        .measure-type.quantitative { background: #e8f8f5; color: #1abc9c; }
+        .measure-type.qualitative { background: #fef9e7; color: #f39c12; }
+        .measure-type.mixed { background: #f4ecf7; color: #8e44ad; }
+        .measure-card p { font-size: 0.85rem; color: var(--text-light); }
+
+        /* PRINT BUTTON */
+        .action-bar {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        .btn-action {
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-action:hover { background: var(--primary); color: white; }
+        .btn-action.filled { background: var(--primary); color: white; }
+        .btn-action.filled:hover { background: var(--primary-light); }
+
+        /* PRINT STYLES */
+        @media print {
+            /* Force print colors */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+
+            /* Hide non-content elements */
+            .header, .progress-container, .nav-buttons, .action-bar,
+            .btn, .results-actions, .ai-sidebar, .ai-overlay, .ai-status-badge,
+            .ai-generating-overlay, .btn-ai-generate, .ai-sidebar-toggle-fab,
+            .autosave-indicator, #aiFab, .app-shell {
+                display: none !important;
+                height: 0 !important; overflow: hidden !important;
+                margin: 0 !important; padding: 0 !important;
+            }
+
+            /* Show print elements */
+            .print-only { display: block !important; }
+
+            /* Page setup */
+            body { background: white !important; margin: 0; padding: 0; font-size: 10pt; }
+            .results-container { display: block !important; padding: 0; }
+            .results-container > .main { margin: 0 auto; padding: 0 0.5in; max-width: 100%; }
+
+            /* Print title page */
+            .print-title-page {
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 90vh;
+                text-align: center;
+                page-break-after: always;
+                padding: 2in 1in;
+            }
+            .print-title-page .print-title-bar {
+                width: 80px; height: 4px; background: #1a5276;
+                margin: 0 auto 1.5rem;
+            }
+            .print-title-page h1 {
+                font-size: 28pt; color: #1a5276; margin: 0 0 0.5rem;
+                font-weight: 800; line-height: 1.2;
+            }
+            .print-title-page .print-program {
+                font-size: 16pt; color: #e67e22; font-weight: 600; margin: 0.5rem 0 1.5rem;
+            }
+            .print-title-page .print-meta {
+                font-size: 11pt; color: #555; line-height: 1.8;
+            }
+            .print-title-page .print-mission {
+                font-size: 11pt; color: #444; font-style: italic;
+                max-width: 500px; line-height: 1.6; margin-top: 2rem;
+                padding: 1rem 1.5rem; border-left: 3px solid #e67e22;
+                text-align: left;
+            }
+            .print-title-page .print-date {
+                font-size: 9pt; color: #999; margin-top: 2rem;
+            }
+
+            /* Logic model grid with colors */
+            .logic-model-output {
+                box-shadow: none !important; border: none; padding: 0.5rem 0;
+                page-break-inside: avoid;
+            }
+            .lm-title { font-size: 14pt !important; color: #1a5276 !important; }
+            .lm-subtitle { font-size: 9pt !important; }
+            .lm-grid { border: 2px solid #1a5276 !important; page-break-inside: avoid; }
+            .lm-col { border-right: 1px solid #ccc !important; }
+            .lm-col-header {
+                color: white !important; font-size: 7pt !important;
+                padding: 0.4rem 0.3rem !important;
+            }
+            .lm-col:nth-child(1) .lm-col-header,
+            .lm-col:nth-child(1) .lm-col-question { background: #1a5276 !important; }
+            .lm-col:nth-child(2) .lm-col-header,
+            .lm-col:nth-child(2) .lm-col-question { background: #2471a3 !important; }
+            .lm-col:nth-child(3) .lm-col-header,
+            .lm-col:nth-child(3) .lm-col-question { background: #2e86c1 !important; }
+            .lm-col:nth-child(4) .lm-col-header,
+            .lm-col:nth-child(4) .lm-col-question { background: #e67e22 !important; }
+            .lm-col:nth-child(5) .lm-col-header,
+            .lm-col:nth-child(5) .lm-col-question { background: #d35400 !important; }
+            .lm-col:nth-child(6) .lm-col-header,
+            .lm-col:nth-child(6) .lm-col-question { background: #27ae60 !important; }
+            .lm-col-question { color: rgba(255,255,255,0.85) !important; }
+            .lm-col-body li { font-size: 7pt !important; }
+
+            /* Theory of Change */
+            .toc-box {
+                page-break-inside: avoid; margin: 1rem 0;
+                border-left: 4px solid #1a5276 !important;
+                background: #f8f9fa !important;
+                padding: 1rem 1.2rem !important;
+            }
+            .toc-box h3 { color: #1a5276 !important; font-size: 12pt !important; }
+            .toc-box p { font-size: 9.5pt !important; line-height: 1.6 !important; }
+
+            /* Detail sections - SHOW in print */
+            .detail-section {
+                display: block !important;
+                box-shadow: none !important;
+                border: 1px solid #e0e0e0 !important;
+                border-radius: 6px !important;
+                padding: 0.75rem 1rem !important;
+                margin-bottom: 0.5rem !important;
+                page-break-inside: avoid;
+            }
+            .detail-section h3 {
+                font-size: 10.5pt !important; color: #1a5276 !important;
+                border-bottom: 1px solid #e0e0e0; padding-bottom: 0.3rem;
+                margin-bottom: 0.4rem !important;
+            }
+            .detail-section h3 .toggle { display: none !important; }
+            .detail-content {
+                display: block !important;
+                font-size: 9pt !important;
+            }
+            .detail-content ul { padding-left: 1rem; }
+            .detail-content li { margin-bottom: 0.2rem; }
+
+            /* Measurement cards */
+            .measure-card {
+                page-break-inside: avoid;
+                border: 1px solid #e0e0e0 !important;
+                padding: 0.5rem 0.75rem !important;
+                margin-bottom: 0.4rem !important;
+            }
+            .measure-card h4 { font-size: 9.5pt !important; color: #1a5276 !important; }
+            .measure-card p { font-size: 8.5pt !important; }
+            .measure-type { font-size: 6.5pt !important; }
+            .measure-type.quantitative { background: #e8f8f5 !important; color: #1abc9c !important; }
+            .measure-type.qualitative { background: #fef9e7 !important; color: #f39c12 !important; }
+            .measure-type.mixed { background: #f4ecf7 !important; color: #8e44ad !important; }
+
+            /* Section headers in print */
+            #detailSections > h2, #measurementSuggestions > h2 {
+                font-size: 13pt !important; color: #1a5276 !important;
+                border-bottom: 2px solid #1a5276; padding-bottom: 0.3rem;
+                page-break-after: avoid;
+            }
+
+            /* AI enhanced badges in print */
+            .ai-badge {
+                display: inline-flex !important;
+                background: #f5f3ff !important; color: #7c3aed !important;
+                font-size: 6pt !important; padding: 0.1rem 0.3rem !important;
+            }
+
+            /* Page breaks */
+            .logic-model-output { page-break-inside: avoid; }
+            #tocOutput { page-break-before: always; }
+            #detailSections > h2 { page-break-before: always; }
+            #measurementSuggestions { page-break-before: always; }
+
+            /* Footer on each page */
+            .print-footer {
+                display: block !important;
+                text-align: center; font-size: 7.5pt; color: #999;
+                margin-top: 1rem; padding-top: 0.5rem;
+                border-top: 1px solid #e0e0e0;
+            }
+        }
+        .print-only { display: none; }
+        .print-title-page { display: none; }
+        .print-footer { display: none; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .lm-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .progress-steps { gap: 0.25rem; }
+            .step-dot .step-label { font-size: 0.55rem; max-width: 50px; }
+            .header h1 { font-size: 1.4rem; }
+            .card { padding: 1.5rem; }
+        }
+        @media (max-width: 480px) {
+            .lm-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* ANIMATION */
+        .fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== AI INTEGRATION STYLES ========== */
+
+        /* APP SHELL - flex layout for sidebar */
+        .app-shell { display: flex; min-height: calc(100vh - 140px); }
+        .wizard-panel { flex: 1; min-width: 0; transition: margin-right 0.3s ease; }
+
+        /* AI HEADER BADGE */
+        .ai-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.6rem;
+            padding: 0.3rem 0.9rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            font-size: 0.78rem;
+        }
+        .ai-status-badge .ai-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #2ecc71; animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+        }
+        .ai-settings-link {
+            background: none; border: none; color: rgba(255,255,255,0.8);
+            cursor: pointer; font-size: 0.75rem; text-decoration: underline;
+            font-family: inherit;
+        }
+
+        /* AI SIDEBAR */
+        .ai-sidebar {
+            width: var(--ai-sidebar-width);
+            background: var(--card);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 56px);
+            position: sticky;
+            top: 56px;
+            transition: width 0.3s ease;
+            box-shadow: -2px 0 12px rgba(0,0,0,0.04);
+            z-index: 50;
+        }
+        .ai-sidebar--hidden { width: 0; overflow: hidden; border-left: none; box-shadow: none; }
+        .ai-sidebar__header {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.7rem 1rem; border-bottom: 1px solid var(--border);
+            background: var(--ai-purple-bg); flex-shrink: 0;
+        }
+        .ai-sidebar__title {
+            font-weight: 700; font-size: 0.88rem; color: var(--ai-purple); flex: 1;
+        }
+        .ai-sidebar__status {
+            width: 8px; height: 8px; border-radius: 50%; background: var(--success);
+        }
+        .ai-sidebar__toggle {
+            background: none; border: none; cursor: pointer; color: var(--text-light);
+            font-size: 1.1rem; padding: 0.2rem; line-height: 1;
+        }
+        .ai-sidebar__messages {
+            flex: 1; overflow-y: auto; padding: 0.75rem;
+            display: flex; flex-direction: column; gap: 0.6rem;
+        }
+        .ai-message {
+            padding: 0.65rem 0.85rem; border-radius: 12px;
+            font-size: 0.82rem; line-height: 1.55; max-width: 95%;
+            animation: fadeIn 0.3s ease; word-wrap: break-word;
+        }
+        .ai-message--assistant {
+            background: var(--ai-purple-bg); border: 1px solid rgba(124,58,237,0.12);
+            color: var(--text); align-self: flex-start;
+        }
+        .ai-message--user {
+            background: var(--primary); color: white; align-self: flex-end;
+        }
+        .ai-message--error {
+            background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
+            align-self: flex-start; font-size: 0.8rem;
+        }
+        .ai-cursor {
+            display: inline-block; width: 6px; height: 14px;
+            background: var(--ai-purple); margin-left: 2px; vertical-align: middle;
+            animation: blink 0.7s infinite;
+        }
+        @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+        .ai-sidebar__input-area {
+            padding: 0.6rem 0.75rem; border-top: 1px solid var(--border);
+            display: flex; gap: 0.4rem; flex-shrink: 0; background: #fafafa;
+        }
+        .ai-sidebar__input-area textarea {
+            flex: 1; padding: 0.5rem 0.7rem; border: 2px solid var(--border);
+            border-radius: 8px; font-size: 0.82rem; font-family: inherit;
+            resize: none; background: white; min-height: 38px; max-height: 80px;
+        }
+        .ai-sidebar__input-area textarea:focus { outline: none; border-color: var(--ai-purple-light); }
+        .ai-sidebar__send-btn {
+            padding: 0.5rem 0.9rem; background: var(--ai-purple); color: white;
+            border: none; border-radius: 8px; font-weight: 600; font-size: 0.8rem;
+            cursor: pointer; align-self: flex-end; transition: background 0.2s; white-space: nowrap;
+        }
+        .ai-sidebar__send-btn:hover { background: #6d28d9; }
+        .ai-sidebar__send-btn:disabled { background: var(--text-light); cursor: not-allowed; }
+
+        /* AI SETUP OVERLAY */
+        .ai-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .ai-overlay--hidden { display: none; }
+        .ai-overlay__card {
+            background: white; border-radius: var(--radius); padding: 2rem;
+            max-width: 480px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .ai-overlay__card h3 { font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--ai-purple); }
+        .ai-overlay__card > p { color: var(--text-light); font-size: 0.9rem; margin-bottom: 1.2rem; }
+        .ai-overlay__actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+
+        /* AI GENERATE BUTTON */
+        .btn-ai-generate {
+            background: linear-gradient(135deg, var(--ai-purple) 0%, var(--ai-purple-light) 100%);
+            color: white; padding: 1rem 2.5rem; font-size: 1.05rem;
+            border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+            font-family: inherit; transition: filter 0.2s;
+        }
+        .btn-ai-generate:hover { filter: brightness(0.95); }
+
+        /* AI GENERATING OVERLAY */
+        .ai-generating-overlay {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.97);
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; z-index: 200;
+        }
+        .ai-generating-spinner {
+            width: 48px; height: 48px; border: 4px solid var(--border);
+            border-top-color: var(--ai-purple); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .ai-generating-status { margin-top: 1rem; font-size: 0.95rem; color: var(--text); }
+        .ai-generating-stream {
+            margin-top: 1.5rem; max-width: 600px; max-height: 200px;
+            overflow-y: auto; font-size: 0.82rem; color: var(--text-light);
+            white-space: pre-wrap; padding: 1rem; background: var(--input-bg);
+            border-radius: 8px; width: 80%;
+        }
+
+        /* AI BADGE */
+        .ai-badge {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.15rem 0.5rem; background: var(--ai-purple-bg);
+            color: var(--ai-purple); border-radius: 4px; font-size: 0.68rem;
+            font-weight: 600; margin-left: 0.5rem; vertical-align: middle;
+        }
+
+        /* AI RESPONSIVE */
+        @media (max-width: 1024px) {
+            .ai-sidebar {
+                position: fixed; right: 0; top: 56px; bottom: 0;
+                z-index: 200; box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+            }
+            .ai-sidebar--hidden { width: 0; }
+        }
+        @media (max-width: 640px) {
+            .ai-sidebar { width: 100vw; }
+        }
+        @media print {
+            .ai-sidebar, .ai-overlay, .ai-status-badge, .ai-generating-overlay,
+            .ai-badge, .btn-ai-generate, .ai-sidebar-toggle-fab { display: none !important; }
+        }
+
+        /* APPLY TO FORM BUTTON */
+        .ai-apply-bar {
+            display: flex; gap: 0.4rem; margin-top: 0.5rem; flex-wrap: wrap;
+        }
+        .ai-apply-btn {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.4rem 0.8rem; border-radius: 6px; border: none;
+            font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+            background: var(--ai-purple); color: white;
+        }
+        .ai-apply-btn:hover { background: #6d28d9; }
+        .ai-apply-btn.applied {
+            background: var(--success); cursor: default; pointer-events: none;
+        }
+        .ai-extract-preview {
+            margin-top: 0.5rem; padding: 0.5rem 0.7rem;
+            background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px;
+            font-size: 0.78rem; line-height: 1.45;
+        }
+        .ai-extract-preview strong { color: var(--success); }
+        .ai-extract-item { padding: 0.15rem 0; }
+
+        /* SUGGESTION CHIPS */
+        .ai-suggest-group { margin-top: 0.5rem; }
+        .ai-suggest-label {
+            font-size: 0.7rem; font-weight: 600; color: var(--ai-purple);
+            margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .ai-suggest-chips {
+            display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.4rem;
+        }
+        .ai-suggest-chip {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.65rem; border-radius: 20px;
+            border: 1.5px solid var(--ai-purple-light); background: white;
+            color: var(--ai-purple); font-size: 0.75rem; font-weight: 500;
+            cursor: pointer; transition: all 0.2s; font-family: inherit;
+            line-height: 1.3;
+        }
+        .ai-suggest-chip:hover {
+            background: var(--ai-purple-bg); border-color: var(--ai-purple);
+            transform: translateY(-1px);
+        }
+        .ai-suggest-chip .chip-icon { font-size: 0.7rem; }
+        .ai-suggest-chip.added {
+            background: #f0fdf4; border-color: var(--success); color: var(--success);
+            cursor: default; pointer-events: none;
+        }
+        .ai-suggest-chip.added .chip-icon::after { content: '✓'; }
+        .ai-suggest-chip:not(.added) .chip-icon::after { content: '+'; }
+
+        /* AUTO-SAVE INDICATOR */
+        .autosave-indicator {
+            position: fixed; bottom: 1rem; left: 1rem; padding: 0.3rem 0.7rem;
+            background: var(--success); color: white; border-radius: 6px;
+            font-size: 0.72rem; font-weight: 600; opacity: 0;
+            transition: opacity 0.3s; z-index: 100; pointer-events: none;
+        }
+        .autosave-indicator.show { opacity: 1; }
+
+        /* FAB to reopen sidebar */
+        .ai-sidebar-toggle-fab {
+            position: fixed; right: 1rem; bottom: 1rem; width: 48px; height: 48px;
+            border-radius: 50%; background: var(--ai-purple); color: white;
+            border: none; font-size: 1.2rem; cursor: pointer; z-index: 100;
+            box-shadow: 0 4px 12px rgba(124,58,237,0.3); display: none;
+            align-items: center; justify-content: center;
+        }
+        .ai-sidebar-toggle-fab.visible { display: flex; }
+    </style>
+</head>
+<body>
+
+<!-- AI SETUP OVERLAY -->
+<div class="ai-overlay ai-overlay--hidden" id="aiSetupOverlay">
+    <div class="ai-overlay__card">
+        <h3>&#x2728; Enable AI-Powered Coaching</h3>
+        <p>Enter your Anthropic API key to get personalized guidance from an AI consultant as you build your logic model. Your key is stored only in your browser and never sent anywhere except Anthropic's API.</p>
+        <div class="form-group">
+            <label for="apiKeyInput">Anthropic API Key</label>
+            <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." style="width:100%;padding:0.7rem;border:2px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:inherit;">
+            <div class="hint">Get a key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--ai-purple);">console.anthropic.com</a></div>
+        </div>
+        <div class="ai-overlay__actions">
+            <button class="btn btn-primary" style="background:var(--ai-purple);" onclick="saveApiKey()">Enable AI Coach</button>
+            <button class="btn btn-secondary" onclick="skipAI()">Skip &mdash; Continue Without AI</button>
+        </div>
+    </div>
+</div>
+
+<div class="header">
+    <h1>Logic Model & Theory of Change Generator</h1>
+    <p>An interactive tool for organizations and ed-tech companies to map their path to impact</p>
+    <div class="ai-status-badge" id="aiHeaderBadge" style="display:none;">
+        <span class="ai-dot"></span>
+        <span>AI Coach Active</span>
+        <button class="ai-settings-link" onclick="openAiSettings()">Settings</button>
+    </div>
+</div>
+
+<div class="progress-container" id="progressBar">
+    <div class="progress-steps">
+        <div class="progress-line" id="progressLine" style="width: 0%"></div>
+        <div class="step-dot active" data-step="0" onclick="goToStep(0)">
+            <div class="dot">1</div>
+            <div class="step-label">About You</div>
+        </div>
+        <div class="step-dot" data-step="1" onclick="goToStep(1)">
+            <div class="dot">2</div>
+            <div class="step-label">Inputs</div>
+        </div>
+        <div class="step-dot" data-step="2" onclick="goToStep(2)">
+            <div class="dot">3</div>
+            <div class="step-label">Activities</div>
+        </div>
+        <div class="step-dot" data-step="3" onclick="goToStep(3)">
+            <div class="dot">4</div>
+            <div class="step-label">Outputs</div>
+        </div>
+        <div class="step-dot" data-step="4" onclick="goToStep(4)">
+            <div class="dot">5</div>
+            <div class="step-label">Outcomes</div>
+        </div>
+        <div class="step-dot" data-step="5" onclick="goToStep(5)">
+            <div class="dot">6</div>
+            <div class="step-label">Impacts</div>
+        </div>
+        <div class="step-dot" data-step="6" onclick="goToStep(6)">
+            <div class="dot">7</div>
+            <div class="step-label">Theory</div>
+        </div>
+        <div class="step-dot" data-step="7" onclick="goToStep(7)">
+            <div class="dot">8</div>
+            <div class="step-label">Review</div>
+        </div>
+    </div>
+</div>
+
+<div class="app-shell" id="appShell">
+<div class="wizard-panel">
+<div class="main" id="mainContent">
+
+    <!-- STEP 0: WELCOME / ORG INFO -->
+    <div class="section-page active" id="step-0">
+        <div class="card fade-in">
+            <div class="welcome-hero">
+                <h2>Let's Build Your Logic Model</h2>
+                <p>Answer a series of guided questions and we'll generate a complete logic model, theory of change, and measurement framework tailored to your organization.</p>
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="fi-icon">&#x1f3af;</div>
+                        <h4>Guided Questions</h4>
+                        <p>Step-by-step prompts for each section</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="fi-icon">&#x1f4cb;</div>
+                        <h4>1-Page Model</h4>
+                        <p>Clean, printable logic model output</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="fi-icon">&#x1f4ca;</div>
+                        <h4>Measurement Plan</h4>
+                        <p>Suggested metrics & evaluation strategies</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card fade-in">
+            <div class="card-header">
+                <div class="card-icon" style="background:#eaf2f8;color:var(--primary);">&#x1f3e2;</div>
+                <h2>About Your Organization</h2>
+            </div>
+            <div class="card-desc">Tell us about your organization so we can tailor the logic model.</div>
+
+            <div class="form-group">
+                <label for="orgName">Organization Name *</label>
+                <input type="text" id="orgName" placeholder="e.g., Bright Futures Learning">
+            </div>
+            <div class="form-group">
+                <label for="orgType">Organization Type *</label>
+                <select id="orgType">
+                    <option value="">Select your organization type...</option>
+                    <option value="Ed-Tech Company">Ed-Tech Company</option>
+                    <option value="Nonprofit Organization">Nonprofit Organization</option>
+                    <option value="K-12 School/District">K-12 School/District</option>
+                    <option value="Higher Education Institution">Higher Education Institution</option>
+                    <option value="Workforce Development">Workforce Development Organization</option>
+                    <option value="Government Agency">Government Agency</option>
+                    <option value="Social Enterprise">Social Enterprise</option>
+                    <option value="Corporate Training">Corporate Training/L&D</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group" id="orgTypeOtherGroup" style="display:none;">
+                <label for="orgTypeOther">Please specify:</label>
+                <input type="text" id="orgTypeOther" placeholder="Describe your organization type">
+            </div>
+            <div class="form-group">
+                <label for="mission">Mission Statement *</label>
+                <div class="hint">Briefly describe the core mission or purpose of your organization.</div>
+                <textarea id="mission" rows="3" placeholder="e.g., To empower underserved youth through technology-enhanced learning experiences that build career-ready skills."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="targetPop">Target Population / Audience *</label>
+                <div class="hint">Who does your organization primarily serve?</div>
+                <textarea id="targetPop" rows="2" placeholder="e.g., High school students in rural communities, first-generation college students, K-8 teachers in Title I schools"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="programName">Program / Product Name (if applicable)</label>
+                <input type="text" id="programName" placeholder="e.g., CodeReady Academy, TeacherPro Platform">
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <div></div>
+            <button class="btn btn-primary" onclick="nextStep()">Get Started &#x2192;</button>
+        </div>
+    </div>
+
+    <!-- STEP 1: INPUTS -->
+    <div class="section-page" id="step-1">
+        <div class="card fade-in">
+            <div class="card-header">
+                <div class="card-icon" style="background:#fdebd0;color:#e67e22;">&#x1f4b0;</div>
+                <h2>Inputs &mdash; What Do You Need?</h2>
+            </div>
+            <div class="card-desc">Inputs are the resources that flow into your organization or program. Think about what you need to make your work possible.</div>
+
+            <div class="form-group">
+                <label>What are your primary funding sources? (select all that apply)</label>
+                <div class="checkbox-group" id="fundingSources">
+                    <label><input type="checkbox" value="Federal/State Grants"> Federal/State Grants</label>
+                    <label><input type="checkbox" value="Private Foundation Grants"> Foundation Grants</label>
+                    <label><input type="checkbox" value="Venture Capital/Investors"> VC / Investors</label>
+                    <label><input type="checkbox" value="Revenue/Sales"> Revenue / Sales</label>
+                    <label><input type="checkbox" value="Donations"> Donations</label>
+                    <label><input type="checkbox" value="Subscriptions/Licensing"> Subscriptions</label>
+                    <label><input type="checkbox" value="Corporate Sponsorship"> Corporate Sponsors</label>
+                    <label><input type="checkbox" value="In-kind Support"> In-kind Support</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>What human capital / staff roles are essential?</label>
+                <div class="hint">List the key roles needed to deliver your program or product.</div>
+                <div class="dynamic-list" id="staffRoles">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Program Director">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Curriculum Designer">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Software Engineers">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('staffRoles', 'e.g., Data Analyst')">+ Add Role</button>
+            </div>
+
+            <div class="form-group">
+                <label>What key partnerships do you have or plan to establish?</label>
+                <div class="dynamic-list" id="partnerships">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Local school districts">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., University research partners">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('partnerships', 'e.g., Industry partners')">+ Add Partnership</button>
+            </div>
+
+            <div class="form-group">
+                <label>What digital tools, technology, or physical assets do you rely on?</label>
+                <div class="dynamic-list" id="techAssets">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Learning Management System (LMS)">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Student devices / hardware">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('techAssets', 'e.g., Assessment platform')">+ Add Asset</button>
+            </div>
+
+            <div class="form-group">
+                <label for="otherInputs">Any other critical resources or inputs?</label>
+                <textarea id="otherInputs" rows="2" placeholder="e.g., Proprietary curriculum, research data, community spaces"></textarea>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="prevStep()">&#x2190; Back</button>
+            <button class="btn btn-primary" onclick="nextStep()">Activities &#x2192;</button>
+        </div>
+    </div>
+
+    <!-- STEP 2: ACTIVITIES -->
+    <div class="section-page" id="step-2">
+        <div class="card fade-in">
+            <div class="card-header">
+                <div class="card-icon" style="background:#d5f5e3;color:#27ae60;">&#x2699;&#xFE0F;</div>
+                <h2>Activities &mdash; What Do You Do?</h2>
+            </div>
+            <div class="card-desc">Activities are the specific actions, services, or processes your organization carries out. What do you do with your resources?</div>
+
+            <div class="form-group">
+                <label>What types of activities does your organization perform? (select all that apply)</label>
+                <div class="checkbox-group" id="activityTypes">
+                    <label><input type="checkbox" value="Teaching/Instruction"> Teaching / Instruction</label>
+                    <label><input type="checkbox" value="Coaching/Mentoring"> Coaching / Mentoring</label>
+                    <label><input type="checkbox" value="Professional Development/Training"> Prof. Development</label>
+                    <label><input type="checkbox" value="Workshops/Seminars"> Workshops / Seminars</label>
+                    <label><input type="checkbox" value="Assessments/Testing"> Assessments / Testing</label>
+                    <label><input type="checkbox" value="Curriculum Development"> Curriculum Dev.</label>
+                    <label><input type="checkbox" value="Software/Platform Development"> Software / Platform Dev.</label>
+                    <label><input type="checkbox" value="Research/Data Collection"> Research / Data</label>
+                    <label><input type="checkbox" value="Community Engagement"> Community Engagement</label>
+                    <label><input type="checkbox" value="Technical Support"> Technical Support</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Describe your core activities in more detail:</label>
+                <div class="hint">For each major activity, briefly describe what it entails and who it serves.</div>
+                <div class="dynamic-list" id="activityDetails">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Deliver 10-week coding bootcamp for high school students">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Train teachers on integrating tech into STEM lessons">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Administer pre/post assessments to measure learning gains">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('activityDetails', 'Describe another activity...')">+ Add Activity</button>
+            </div>
+
+            <div class="form-group">
+                <label for="activityFrequency">How frequently are these activities delivered?</label>
+                <select id="activityFrequency">
+                    <option value="">Select frequency...</option>
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly">Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Quarterly">Quarterly / Per semester</option>
+                    <option value="Annually">Annually</option>
+                    <option value="Ongoing/Continuous">Ongoing / Continuous access</option>
+                    <option value="Varies by program">Varies by program</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="deliveryMode">Primary delivery mode:</label>
+                <select id="deliveryMode">
+                    <option value="">Select delivery mode...</option>
+                    <option value="In-person">In-person</option>
+                    <option value="Fully online/virtual">Fully online / Virtual</option>
+                    <option value="Hybrid (in-person + online)">Hybrid</option>
+                    <option value="Self-paced digital platform">Self-paced digital platform</option>
+                    <option value="Multiple modes">Multiple modes</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="prevStep()">&#x2190; Back</button>
+            <button class="btn btn-primary" onclick="nextStep()">Outputs &#x2192;</button>
+        </div>
+    </div>
+
+    <!-- STEP 3: OUTPUTS -->
+    <div class="section-page" id="step-3">
+        <div class="card fade-in">
+            <div class="card-header">
+                <div class="card-icon" style="background:#d6eaf8;color:#2980b9;">&#x1f4c8;</div>
+                <h2>Outputs &mdash; What Will You Measure?</h2>
+            </div>
+            <div class="card-desc">Outputs are the direct, countable products of your activities. These are the "how much" and "how many" metrics.</div>
+
+            <div class="form-group">
+                <label>What participant groups will you track? (select all that apply)</label>
+                <div class="checkbox-group" id="participantGroups">
+                    <label><input type="checkbox" value="Students"> Students</label>
+                    <label><input type="checkbox" value="Teachers/Educators"> Teachers / Educators</label>
+                    <label><input type="checkbox" value="Administrators"> Administrators</label>
+                    <label><input type="checkbox" value="Parents/Families"> Parents / Families</label>
+                    <label><input type="checkbox" value="Working Professionals"> Working Professionals</label>
+                    <label><input type="checkbox" value="Community Members"> Community Members</label>
+                    <label><input type="checkbox" value="Organizations/Schools"> Organizations / Schools</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="annualParticipants">Approximately how many total participants do you aim to serve annually?</label>
+                <input type="text" id="annualParticipants" placeholder="e.g., 500 students, 50 teachers">
+            </div>
+
+            <div class="form-group">
+                <label>What specific outputs will your activities produce?</label>
+                <div class="hint">Think about what you can count: sessions held, materials created, participants served, etc.</div>
+                <div class="dynamic-list" id="specificOutputs">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., # of training sessions delivered">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., # of students completing the program">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., # of curriculum modules developed">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('specificOutputs', 'e.g., # of assessments administered')">+ Add Output</button>
+            </div>
+
+            <div class="form-group">
+                <label for="dataCollection">How do you currently collect data on these outputs? (or how do you plan to?)</label>
+                <textarea id="dataCollection" rows="2" placeholder="e.g., Platform analytics, sign-in sheets, LMS tracking, CRM system"></textarea>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="prevStep()">&#x2190; Back</button>
+            <button class="btn btn-primary" onclick="nextStep()">Outcomes &#x2192;</button>
+        </div>
+    </div>
+
+    <!-- STEP 4: OUTCOMES (SHORT + MEDIUM) -->
+    <div class="section-page" id="step-4">
+        <div class="card fade-in">
+            <div class="card-header">
+                <div class="card-icon" style="background:#fdebd0;color:#e67e22;">&#x1f31f;</div>
+                <h2>Outcomes &mdash; What Changes Do You Expect?</h2>
+            </div>
+            <div class="card-desc">Outcomes are the changes that happen as a result of your work. Think about short-term and medium-term changes.</div>
+
+            <h3 style="font-size:1.05rem; margin: 1.5rem 0 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--border);">Short-Term Outcomes (1-3 years)</h3>
+
+            <div class="form-group">
+                <label>What changes in knowledge, skills, or awareness do you expect in the short term?</label>
+                <div class="dynamic-list" id="shortKnowledge">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Increased digital literacy among students">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Teachers gain confidence using new technology">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('shortKnowledge', 'Describe another expected change...')">+ Add Outcome</button>
+            </div>
+
+            <div class="form-group">
+                <label>What initial behavioral changes do you expect to see?</label>
+                <div class="dynamic-list" id="shortBehavior">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Students voluntarily engage in coding projects">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Teachers integrate tech into lesson plans weekly">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('shortBehavior', 'Describe another behavioral change...')">+ Add Outcome</button>
+            </div>
+
+            <div class="form-group">
+                <label for="shortFeedback">What early feedback or satisfaction metrics will you track?</label>
+                <textarea id="shortFeedback" rows="2" placeholder="e.g., Participant satisfaction surveys, Net Promoter Score, engagement rates"></textarea>
+            </div>
+
+            <h3 style="font-size:1.05rem; margin: 1.5rem 0 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--border);">Medium-Term Outcomes (3-5 years)</h3>
+
+            <div class="form-group">
+                <label>What sustained practice or behavioral changes do you expect?</label>
+                <div class="dynamic-list" id="medBehavior">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Schools adopt technology-integrated curriculum districtwide">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Students pursue STEM careers at higher rates">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('medBehavior', 'Describe another sustained change...')">+ Add Outcome</button>
+            </div>
+
+            <div class="form-group">
+                <label>What organizational or systemic changes do you hope to influence?</label>
+                <div class="dynamic-list" id="medSystemic">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Partner districts increase STEM funding">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Policy changes support equitable tech access">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('medSystemic', 'Describe another systemic change...')">+ Add Outcome</button>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="prevStep()">&#x2190; Back</button>
+            <button class="btn btn-primary" onclick="nextStep()">Impacts &#x2192;</button>
+        </div>
+    </div>
+
+    <!-- STEP 5: IMPACTS -->
+    <div class="section-page" id="step-5">
+        <div class="card fade-in">
+            <div class="card-header">
+                <div class="card-icon" style="background:#d5f5e3;color:#27ae60;">&#x1f30d;</div>
+                <h2>Long-Term Impacts &mdash; What's Your Vision?</h2>
+            </div>
+            <div class="card-desc">Impacts are the broad, lasting changes you aspire to create (5+ years). These are your "north star" goals.</div>
+
+            <div class="form-group">
+                <label>What is the ultimate change you want to see in your target population?</label>
+                <div class="dynamic-list" id="impactPopulation">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Historically underserved students achieve equitable outcomes in STEM careers">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('impactPopulation', 'Describe another population-level impact...')">+ Add Impact</button>
+            </div>
+
+            <div class="form-group">
+                <label>What broader societal or community-level impact do you aspire to?</label>
+                <div class="dynamic-list" id="impactSocietal">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Close the digital divide in rural and underserved communities">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('impactSocietal', 'Describe another societal impact...')">+ Add Impact</button>
+            </div>
+
+            <div class="form-group">
+                <label for="impactEvidence">How will you ultimately know your organization has achieved its long-term vision?</label>
+                <textarea id="impactEvidence" rows="3" placeholder="e.g., Longitudinal data showing increased college enrollment, employment rates, and earnings for program alumni compared to matched peers"></textarea>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="prevStep()">&#x2190; Back</button>
+            <button class="btn btn-primary" onclick="nextStep()">Theory of Change &#x2192;</button>
+        </div>
+    </div>
+
+    <!-- STEP 6: THEORY OF CHANGE -->
+    <div class="section-page" id="step-6">
+        <div class="card fade-in">
+            <div class="card-header">
+                <div class="card-icon" style="background:#f4ecf7;color:#8e44ad;">&#x1f4a1;</div>
+                <h2>Theory of Change &mdash; Why Will This Work?</h2>
+            </div>
+            <div class="card-desc">Your theory of change explains the causal logic behind your work: why you believe your activities will lead to your intended outcomes and impacts.</div>
+
+            <div class="form-group">
+                <label for="coreProblem">What is the core problem you're trying to solve? *</label>
+                <div class="hint">Describe the need, gap, or challenge that motivates your work.</div>
+                <textarea id="coreProblem" rows="3" placeholder="e.g., Students in underserved communities lack access to quality STEM education and career pathways, perpetuating cycles of economic inequality."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="whyApproach">Why do you believe your approach will work?</label>
+                <div class="hint">What evidence, research, or logic supports your chosen strategy?</div>
+                <textarea id="whyApproach" rows="3" placeholder="e.g., Research shows that hands-on, project-based learning with industry mentors significantly increases STEM engagement and persistence, especially for underrepresented students."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>What key assumptions underlie your theory of change?</label>
+                <div class="hint">What must be true for your model to work as planned?</div>
+                <div class="dynamic-list" id="assumptions">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Students have reliable internet access">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Teachers will adopt new tools if given adequate training">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Partner organizations remain committed for the full program cycle">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('assumptions', 'Add another assumption...')">+ Add Assumption</button>
+            </div>
+
+            <div class="form-group">
+                <label>What external factors could influence your success?</label>
+                <div class="dynamic-list" id="externalFactors">
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Changes in education policy or funding priorities">
+                    </div>
+                    <div class="list-item">
+                        <input type="text" placeholder="e.g., Technology infrastructure in target communities">
+                    </div>
+                </div>
+                <button class="add-btn" onclick="addListItem('externalFactors', 'Add another factor...')">+ Add Factor</button>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="prevStep()">&#x2190; Back</button>
+            <button class="btn btn-primary" onclick="nextStep()">Review &#x2192;</button>
+        </div>
+    </div>
+
+    <!-- STEP 7: REVIEW & GENERATE -->
+    <div class="section-page" id="step-7">
+        <div class="card fade-in">
+            <div class="card-header">
+                <div class="card-icon" style="background:#eaf2f8;color:var(--primary);">&#x2705;</div>
+                <h2>Review & Generate</h2>
+            </div>
+            <div class="card-desc">Review a summary of your responses below. Click "Generate" to create your completed logic model, theory of change, and measurement framework.</div>
+
+            <div id="reviewSummary"></div>
+
+            <div style="text-align:center; margin-top:2rem; display:flex; flex-direction:column; gap:0.75rem; align-items:center;">
+                <button class="btn btn-generate" onclick="generateModel()">&#x1f680; Generate My Logic Model</button>
+                <button class="btn-ai-generate" id="aiGenerateBtn" style="display:none;" onclick="generateWithAI()">&#x2728; AI-Enhanced Generation</button>
+                <p id="aiGenerateHint" style="display:none;font-size:0.8rem;color:var(--ai-purple);max-width:400px;">AI will enrich your Theory of Change, suggest missing elements, and provide personalized measurement recommendations.</p>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" onclick="prevStep()">&#x2190; Back</button>
+            <div></div>
+        </div>
+    </div>
+</div>
+
+</div><!-- end wizard-panel -->
+
+<!-- AI COACH SIDEBAR -->
+<aside class="ai-sidebar ai-sidebar--hidden" id="aiCoachSidebar">
+    <div class="ai-sidebar__header">
+        <div class="ai-sidebar__title">&#x1f9e0; AI Coach</div>
+        <div class="ai-sidebar__status" id="aiStatusDot"></div>
+        <button class="ai-sidebar__toggle" id="aiSidebarToggle" onclick="toggleSidebar()" title="Close sidebar">&times;</button>
+    </div>
+    <div class="ai-sidebar__messages" id="aiMessages">
+        <div class="ai-message ai-message--assistant" style="font-style:italic;color:var(--text-light);">
+            AI coach will appear here when you start filling in your logic model.
+        </div>
+    </div>
+    <div class="ai-sidebar__input-area">
+        <textarea id="aiChatInput" placeholder="Ask the AI coach..." rows="1"></textarea>
+        <button class="ai-sidebar__send-btn" id="aiSendBtn" onclick="sendUserMessage()">Send</button>
+    </div>
+</aside>
+</div><!-- end app-shell -->
+
+<!-- FAB to reopen sidebar -->
+<button class="ai-sidebar-toggle-fab" id="aiFab" onclick="toggleSidebar()" title="Open AI Coach">&#x1f9e0;</button>
+
+<!-- AUTO-SAVE INDICATOR -->
+<div class="autosave-indicator" id="autosaveIndicator">Saved</div>
+
+<!-- RESULTS -->
+<div class="results-container" id="resultsContainer">
+    <!-- PRINT TITLE PAGE (hidden on screen, shown in print) -->
+    <div class="print-title-page" id="printTitlePage">
+        <div class="print-title-bar"></div>
+        <h1 id="printOrgTitle"></h1>
+        <div class="print-program" id="printProgramName"></div>
+        <div class="print-meta" id="printMeta"></div>
+        <div class="print-mission" id="printMission"></div>
+        <div class="print-date" id="printDate"></div>
+    </div>
+
+    <div class="main">
+        <div class="action-bar">
+            <button class="btn-action filled" onclick="window.print()">&#x1f5a8; Print / Save as PDF</button>
+            <button class="btn-action" onclick="exportJSON()">&#x1f4be; Export Data (JSON)</button>
+            <button class="btn-action" onclick="startOver()">&#x21bb; Start Over</button>
+        </div>
+
+        <!-- 1-PAGE LOGIC MODEL -->
+        <div class="logic-model-output" id="logicModelOutput"></div>
+
+        <!-- THEORY OF CHANGE -->
+        <div id="tocOutput"></div>
+
+        <!-- DETAILED SECTIONS -->
+        <div id="detailSections"></div>
+
+        <!-- MEASUREMENT SUGGESTIONS -->
+        <div id="measurementSuggestions"></div>
+
+        <div class="print-footer">Generated by Logic Model & Theory of Change Generator</div>
+
+        <div class="action-bar" style="margin-top: 2rem;">
+            <button class="btn-action filled" onclick="window.print()">&#x1f5a8; Print / Save as PDF</button>
+            <button class="btn-action" onclick="startOver()">&#x21bb; Start Over</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========== STATE ==========
+let currentStep = 0;
+const totalSteps = 8;
+
+// ========== NAVIGATION ==========
+function goToStep(step) {
+    if (step > currentStep) return; // Can only go back to completed steps
+    showStep(step);
+}
+
+function nextStep() {
+    if (currentStep === 0 && !validateStep0()) return;
+    if (currentStep < totalSteps - 1) {
+        showStep(currentStep + 1);
+    }
+    if (currentStep === 7) {
+        buildReviewSummary();
+    }
+}
+
+function prevStep() {
+    if (currentStep > 0) showStep(currentStep - 1);
+}
+
+function showStep(step) {
+    document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('step-' + step);
+    if (target) {
+        target.classList.add('active');
+        target.querySelector('.card')?.classList.add('fade-in');
+    }
+
+    // Update progress dots
+    document.querySelectorAll('.step-dot').forEach((dot, i) => {
+        dot.classList.remove('active', 'completed');
+        if (i < step) dot.classList.add('completed');
+        if (i === step) dot.classList.add('active');
+    });
+
+    // Update progress line
+    const pct = step === 0 ? 0 : (step / (totalSteps - 1)) * 100;
+    document.getElementById('progressLine').style.width = pct + '%';
+
+    currentStep = step;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (step === 7) buildReviewSummary();
+}
+
+function validateStep0() {
+    const name = document.getElementById('orgName').value.trim();
+    const type = document.getElementById('orgType').value;
+    const mission = document.getElementById('mission').value.trim();
+    const target = document.getElementById('targetPop').value.trim();
+    if (!name || !type || !mission || !target) {
+        alert('Please fill in all required fields (Organization Name, Type, Mission, and Target Population).');
+        return false;
+    }
+    return true;
+}
+
+// ========== DYNAMIC LISTS ==========
+function addListItem(containerId, placeholder) {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.innerHTML = `<input type="text" placeholder="${placeholder}">
+        <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>`;
+    container.appendChild(div);
+    div.querySelector('input').focus();
+}
+
+// ========== CHECKBOX STYLING ==========
+document.addEventListener('change', function(e) {
+    if (e.target.type === 'checkbox') {
+        const label = e.target.closest('label');
+        if (label) {
+            label.classList.toggle('checked', e.target.checked);
+        }
+    }
+});
+
+// ========== ORG TYPE OTHER ==========
+document.getElementById('orgType').addEventListener('change', function() {
+    document.getElementById('orgTypeOtherGroup').style.display =
+        this.value === 'Other' ? 'block' : 'none';
+});
+
+// ========== COLLECT DATA ==========
+function collectData() {
+    const data = {};
+
+    // Org info
+    data.orgName = document.getElementById('orgName').value.trim();
+    data.orgType = document.getElementById('orgType').value === 'Other'
+        ? document.getElementById('orgTypeOther').value.trim()
+        : document.getElementById('orgType').value;
+    data.mission = document.getElementById('mission').value.trim();
+    data.targetPop = document.getElementById('targetPop').value.trim();
+    data.programName = document.getElementById('programName').value.trim();
+
+    // Inputs
+    data.funding = getCheckedValues('fundingSources');
+    data.staffRoles = getListValues('staffRoles');
+    data.partnerships = getListValues('partnerships');
+    data.techAssets = getListValues('techAssets');
+    data.otherInputs = document.getElementById('otherInputs').value.trim();
+
+    // Activities
+    data.activityTypes = getCheckedValues('activityTypes');
+    data.activityDetails = getListValues('activityDetails');
+    data.activityFrequency = document.getElementById('activityFrequency').value;
+    data.deliveryMode = document.getElementById('deliveryMode').value;
+
+    // Outputs
+    data.participantGroups = getCheckedValues('participantGroups');
+    data.annualParticipants = document.getElementById('annualParticipants').value.trim();
+    data.specificOutputs = getListValues('specificOutputs');
+    data.dataCollection = document.getElementById('dataCollection').value.trim();
+
+    // Outcomes
+    data.shortKnowledge = getListValues('shortKnowledge');
+    data.shortBehavior = getListValues('shortBehavior');
+    data.shortFeedback = document.getElementById('shortFeedback').value.trim();
+    data.medBehavior = getListValues('medBehavior');
+    data.medSystemic = getListValues('medSystemic');
+
+    // Impacts
+    data.impactPopulation = getListValues('impactPopulation');
+    data.impactSocietal = getListValues('impactSocietal');
+    data.impactEvidence = document.getElementById('impactEvidence').value.trim();
+
+    // Theory of Change
+    data.coreProblem = document.getElementById('coreProblem').value.trim();
+    data.whyApproach = document.getElementById('whyApproach').value.trim();
+    data.assumptions = getListValues('assumptions');
+    data.externalFactors = getListValues('externalFactors');
+
+    return data;
+}
+
+function getCheckedValues(containerId) {
+    const checks = document.querySelectorAll('#' + containerId + ' input[type="checkbox"]:checked');
+    return Array.from(checks).map(c => c.value);
+}
+
+function getListValues(containerId) {
+    const inputs = document.querySelectorAll('#' + containerId + ' input[type="text"]');
+    return Array.from(inputs).map(i => i.value.trim()).filter(v => v);
+}
+
+// ========== REVIEW SUMMARY ==========
+function buildReviewSummary() {
+    const data = collectData();
+    const container = document.getElementById('reviewSummary');
+
+    const sections = [
+        { title: 'Organization', items: [
+            `<strong>Name:</strong> ${data.orgName || '<em>Not provided</em>'}`,
+            `<strong>Type:</strong> ${data.orgType || '<em>Not provided</em>'}`,
+            `<strong>Mission:</strong> ${data.mission || '<em>Not provided</em>'}`,
+            `<strong>Target:</strong> ${data.targetPop || '<em>Not provided</em>'}`,
+            data.programName ? `<strong>Program:</strong> ${data.programName}` : null
+        ]},
+        { title: 'Inputs', items: [
+            data.funding.length ? `<strong>Funding:</strong> ${data.funding.join(', ')}` : null,
+            data.staffRoles.length ? `<strong>Staff:</strong> ${data.staffRoles.join(', ')}` : null,
+            data.partnerships.length ? `<strong>Partners:</strong> ${data.partnerships.join(', ')}` : null,
+            data.techAssets.length ? `<strong>Tech/Assets:</strong> ${data.techAssets.join(', ')}` : null,
+        ]},
+        { title: 'Activities', items: [
+            data.activityTypes.length ? `<strong>Types:</strong> ${data.activityTypes.join(', ')}` : null,
+            data.activityDetails.length ? `<strong>Details:</strong> ${data.activityDetails.join('; ')}` : null,
+            data.activityFrequency ? `<strong>Frequency:</strong> ${data.activityFrequency}` : null,
+            data.deliveryMode ? `<strong>Mode:</strong> ${data.deliveryMode}` : null,
+        ]},
+        { title: 'Outputs', items: [
+            data.participantGroups.length ? `<strong>Groups:</strong> ${data.participantGroups.join(', ')}` : null,
+            data.annualParticipants ? `<strong>Annual reach:</strong> ${data.annualParticipants}` : null,
+            data.specificOutputs.length ? `<strong>Outputs:</strong> ${data.specificOutputs.join('; ')}` : null,
+        ]},
+        { title: 'Outcomes', items: [
+            data.shortKnowledge.length ? `<strong>Short-term (knowledge):</strong> ${data.shortKnowledge.join('; ')}` : null,
+            data.shortBehavior.length ? `<strong>Short-term (behavior):</strong> ${data.shortBehavior.join('; ')}` : null,
+            data.medBehavior.length ? `<strong>Medium-term (practice):</strong> ${data.medBehavior.join('; ')}` : null,
+            data.medSystemic.length ? `<strong>Medium-term (systemic):</strong> ${data.medSystemic.join('; ')}` : null,
+        ]},
+        { title: 'Impacts', items: [
+            data.impactPopulation.length ? `<strong>Population:</strong> ${data.impactPopulation.join('; ')}` : null,
+            data.impactSocietal.length ? `<strong>Societal:</strong> ${data.impactSocietal.join('; ')}` : null,
+        ]},
+    ];
+
+    container.innerHTML = sections.map(s => {
+        const filtered = s.items.filter(Boolean);
+        if (!filtered.length) return '';
+        return `<div style="margin-bottom:1rem; padding:0.75rem; border-radius:8px; background:var(--input-bg); border:1px solid var(--border);">
+            <div style="font-weight:700; font-size:0.85rem; margin-bottom:0.3rem; color:var(--primary);">${s.title}</div>
+            <div style="font-size:0.85rem; line-height:1.6;">${filtered.join('<br>')}</div>
+        </div>`;
+    }).join('');
+}
+
+// ========== GENERATE MODEL ==========
+function generateModel() {
+    const data = collectData();
+    if (!data.orgName || !data.mission) {
+        alert('Please complete at least the organization information before generating.');
+        return;
+    }
+
+    // Hide wizard, show results
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('progressBar').style.display = 'none';
+    document.getElementById('aiCoachSidebar')?.classList.add('ai-sidebar--hidden');
+    document.getElementById('aiFab')?.classList.remove('visible');
+    document.getElementById('resultsContainer').classList.add('active');
+
+    // Populate print title page
+    populatePrintTitlePage(data);
+
+    renderLogicModel(data);
+    renderTheoryOfChange(data);
+    renderDetailSections(data);
+    renderMeasurementSuggestions(data);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function populatePrintTitlePage(data) {
+    document.getElementById('printOrgTitle').textContent = data.orgName + ' Logic Model';
+    document.getElementById('printProgramName').textContent = data.programName || '';
+    document.getElementById('printMeta').innerHTML =
+        '<strong>' + esc(data.orgType) + '</strong><br>Target: ' + esc(data.targetPop);
+    document.getElementById('printMission').textContent = data.mission;
+    document.getElementById('printDate').textContent = 'Generated ' + new Date().toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+}
+
+// ========== RENDER LOGIC MODEL (1-PAGE) ==========
+function renderLogicModel(data) {
+    const el = document.getElementById('logicModelOutput');
+    const programLabel = data.programName ? ` &mdash; ${esc(data.programName)}` : '';
+
+    const inputsList = [
+        ...data.funding.map(f => f),
+        ...data.staffRoles,
+        ...data.partnerships,
+        ...data.techAssets,
+        data.otherInputs
+    ].filter(Boolean);
+
+    const activitiesList = [
+        ...data.activityTypes,
+        ...data.activityDetails.filter(d => !data.activityTypes.some(t => d.toLowerCase().includes(t.toLowerCase())))
+    ].filter(Boolean);
+
+    const outputsList = [
+        ...data.specificOutputs,
+        data.annualParticipants ? `Target: ${data.annualParticipants}` : null,
+        ...data.participantGroups.map(g => `Track: ${g}`)
+    ].filter(Boolean);
+
+    const shortOutcomes = [
+        ...data.shortKnowledge,
+        ...data.shortBehavior,
+        data.shortFeedback
+    ].filter(Boolean);
+
+    const medOutcomes = [
+        ...data.medBehavior,
+        ...data.medSystemic
+    ].filter(Boolean);
+
+    const impacts = [
+        ...data.impactPopulation,
+        ...data.impactSocietal
+    ].filter(Boolean);
+
+    el.innerHTML = `
+        <div class="print-only" style="text-align:center;margin-bottom:0.5rem;font-size:0.7rem;color:#999;">Generated by Logic Model Generator</div>
+        <div class="lm-title">${esc(data.orgName)} Logic Model${programLabel}</div>
+        <div class="lm-subtitle">${esc(data.orgType)} &bull; Target: ${esc(data.targetPop)}</div>
+        <div style="text-align:center;font-size:0.8rem;color:var(--text-light);margin-bottom:1rem;font-style:italic;max-width:600px;margin-left:auto;margin-right:auto;">"${esc(data.mission)}"</div>
+        <div class="lm-grid">
+            ${buildColumn('Inputs', 'What do we need?', inputsList)}
+            ${buildColumn('Activities', 'What do we do?', activitiesList)}
+            ${buildColumn('Outputs', 'What do we measure?', outputsList)}
+            ${buildColumn('Short-term Outcomes', '1-3 Years', shortOutcomes)}
+            ${buildColumn('Med-term Outcomes', '3-5 Years', medOutcomes)}
+            ${buildColumn('Impacts', '5+ Years', impacts)}
+        </div>
+        ${data.deliveryMode || data.activityFrequency ? `<div style="text-align:center;margin-top:0.75rem;font-size:0.75rem;color:var(--text-light);">
+            ${data.deliveryMode ? `Delivery: ${esc(data.deliveryMode)}` : ''}
+            ${data.deliveryMode && data.activityFrequency ? ' &bull; ' : ''}
+            ${data.activityFrequency ? `Frequency: ${esc(data.activityFrequency)}` : ''}
+        </div>` : ''}
+    `;
+}
+
+function buildColumn(title, question, items) {
+    const listItems = items.length
+        ? items.map(i => `<li>${esc(i)}</li>`).join('')
+        : '<li style="color:#bbb;font-style:italic;">Not specified</li>';
+    return `<div class="lm-col">
+        <div class="lm-col-header">${title}</div>
+        <div class="lm-col-question">${question}</div>
+        <div class="lm-col-body"><ul>${listItems}</ul></div>
+    </div>`;
+}
+
+// ========== THEORY OF CHANGE ==========
+function renderTheoryOfChange(data) {
+    const el = document.getElementById('tocOutput');
+    if (!data.coreProblem && !data.whyApproach) {
+        el.innerHTML = '';
+        return;
+    }
+
+    let tocText = '';
+    if (data.coreProblem) {
+        tocText += `<strong>The Problem:</strong> ${esc(data.coreProblem)}<br><br>`;
+    }
+    if (data.whyApproach) {
+        tocText += `<strong>Our Approach:</strong> ${esc(data.whyApproach)}<br><br>`;
+    }
+
+    // Build narrative
+    const hasActivities = data.activityTypes.length || data.activityDetails.length;
+    const hasOutcomes = data.shortKnowledge.length || data.shortBehavior.length;
+    const hasImpacts = data.impactPopulation.length || data.impactSocietal.length;
+
+    if (hasActivities || hasOutcomes || hasImpacts) {
+        tocText += `<strong>The Logic:</strong> By providing `;
+        if (hasActivities) {
+            const acts = [...data.activityTypes.slice(0,3), ...data.activityDetails.slice(0,2)].filter(Boolean);
+            tocText += `<em>${acts.join(', ').toLowerCase()}</em>`;
+        } else {
+            tocText += 'our core programs';
+        }
+        tocText += ` to <em>${esc(data.targetPop.toLowerCase())}</em>, we expect to first see `;
+        if (hasOutcomes) {
+            const outcomes = [...data.shortKnowledge.slice(0,2), ...data.shortBehavior.slice(0,1)].filter(Boolean);
+            tocText += `<em>${outcomes.join('; ').toLowerCase()}</em>`;
+        } else {
+            tocText += 'initial knowledge and behavioral changes';
+        }
+        tocText += `. Over time, this will lead to `;
+        if (hasImpacts) {
+            tocText += `<em>${[...data.impactPopulation, ...data.impactSocietal].join('; ').toLowerCase()}</em>`;
+        } else {
+            tocText += 'lasting systemic change';
+        }
+        tocText += `.`;
+    }
+
+    let assumptionsHtml = '';
+    if (data.assumptions.length) {
+        assumptionsHtml = `<br><br><strong>Key Assumptions:</strong><ul style="margin-top:0.3rem;">${data.assumptions.map(a => `<li>${esc(a)}</li>`).join('')}</ul>`;
+    }
+
+    let factorsHtml = '';
+    if (data.externalFactors.length) {
+        factorsHtml = `<strong>External Factors:</strong><ul style="margin-top:0.3rem;">${data.externalFactors.map(f => `<li>${esc(f)}</li>`).join('')}</ul>`;
+    }
+
+    el.innerHTML = `<div class="toc-box">
+        <h3>Theory of Change</h3>
+        <p>${tocText}${assumptionsHtml}${factorsHtml}</p>
+    </div>`;
+}
+
+// ========== DETAIL SECTIONS ==========
+function renderDetailSections(data) {
+    const el = document.getElementById('detailSections');
+
+    const sections = [
+        {
+            icon: '&#x1f4b0;',
+            title: 'Inputs (Resources)',
+            content: buildDetailList([
+                { label: 'Funding Sources', items: data.funding },
+                { label: 'Key Staff Roles', items: data.staffRoles },
+                { label: 'Partnerships', items: data.partnerships },
+                { label: 'Technology & Assets', items: data.techAssets },
+                data.otherInputs ? { label: 'Other Resources', text: data.otherInputs } : null,
+            ])
+        },
+        {
+            icon: '&#x2699;&#xFE0F;',
+            title: 'Activities',
+            content: buildDetailList([
+                { label: 'Activity Types', items: data.activityTypes },
+                { label: 'Activity Details', items: data.activityDetails },
+                data.activityFrequency ? { label: 'Delivery Frequency', text: data.activityFrequency } : null,
+                data.deliveryMode ? { label: 'Delivery Mode', text: data.deliveryMode } : null,
+            ])
+        },
+        {
+            icon: '&#x1f4c8;',
+            title: 'Outputs',
+            content: buildDetailList([
+                { label: 'Participant Groups', items: data.participantGroups },
+                data.annualParticipants ? { label: 'Annual Target', text: data.annualParticipants } : null,
+                { label: 'Specific Outputs', items: data.specificOutputs },
+                data.dataCollection ? { label: 'Data Collection Methods', text: data.dataCollection } : null,
+            ])
+        },
+        {
+            icon: '&#x1f31f;',
+            title: 'Short-Term Outcomes (1-3 Years)',
+            content: buildDetailList([
+                { label: 'Knowledge & Skills Changes', items: data.shortKnowledge },
+                { label: 'Behavioral Changes', items: data.shortBehavior },
+                data.shortFeedback ? { label: 'Feedback & Satisfaction', text: data.shortFeedback } : null,
+            ])
+        },
+        {
+            icon: '&#x1f4a1;',
+            title: 'Medium-Term Outcomes (3-5 Years)',
+            content: buildDetailList([
+                { label: 'Sustained Practice Changes', items: data.medBehavior },
+                { label: 'Systemic Changes', items: data.medSystemic },
+            ])
+        },
+        {
+            icon: '&#x1f30d;',
+            title: 'Long-Term Impacts (5+ Years)',
+            content: buildDetailList([
+                { label: 'Population-Level Change', items: data.impactPopulation },
+                { label: 'Societal Impact', items: data.impactSocietal },
+                data.impactEvidence ? { label: 'Evidence of Success', text: data.impactEvidence } : null,
+            ])
+        },
+    ];
+
+    el.innerHTML = `<h2 style="font-size:1.2rem;margin:2rem 0 1rem;color:var(--primary);">Detailed Breakdown</h2>` +
+        sections.map(s => `<div class="detail-section">
+            <h3 onclick="this.querySelector('.toggle').classList.toggle('open'); this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none';">
+                <span>${s.icon}</span>
+                <span>${s.title}</span>
+                <span class="toggle open" style="margin-left:auto;">&#x25B6;</span>
+            </h3>
+            <div class="detail-content">${s.content}</div>
+        </div>`).join('');
+}
+
+function buildDetailList(groups) {
+    return groups.filter(Boolean).map(g => {
+        if (g.text) {
+            return `<p><strong>${g.label}:</strong> ${esc(g.text)}</p>`;
+        }
+        if (g.items && g.items.length) {
+            return `<p><strong>${g.label}:</strong></p><ul>${g.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`;
+        }
+        return '';
+    }).filter(Boolean).join('') || '<p style="color:#999;font-style:italic;">No data provided for this section.</p>';
+}
+
+// ========== MEASUREMENT SUGGESTIONS ==========
+function renderMeasurementSuggestions(data) {
+    const el = document.getElementById('measurementSuggestions');
+    const suggestions = generateMeasurementSuggestions(data);
+
+    el.innerHTML = `
+        <h2 style="font-size:1.2rem;margin:2rem 0 0.5rem;color:var(--primary);">Recommended Measurement Framework</h2>
+        <p style="font-size:0.9rem;color:var(--text-light);margin-bottom:1rem;">Based on your logic model, here are suggested approaches for measuring your organization's success at each stage.</p>
+        ${suggestions.map(cat => `
+            <div class="detail-section">
+                <h3 onclick="this.querySelector('.toggle').classList.toggle('open'); this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none';">
+                    <span>${cat.icon}</span>
+                    <span>${cat.title}</span>
+                    <span class="toggle open" style="margin-left:auto;">&#x25B6;</span>
+                </h3>
+                <div class="detail-content">
+                    ${cat.measures.map(m => `<div class="measure-card">
+                        <span class="measure-type ${m.type}">${m.type}</span>
+                        <h4>${m.name}</h4>
+                        <p>${m.description}</p>
+                    </div>`).join('')}
+                </div>
+            </div>
+        `).join('')}
+    `;
+}
+
+function generateMeasurementSuggestions(data) {
+    const suggestions = [];
+
+    // OUTPUT MEASURES
+    const outputMeasures = [];
+    if (data.participantGroups.length) {
+        outputMeasures.push({
+            name: 'Participant Reach Tracking',
+            type: 'quantitative',
+            description: `Track the number of ${data.participantGroups.join(', ').toLowerCase()} served per program cycle. Use registration databases and attendance logs. Compare against your target of ${data.annualParticipants || 'your annual goal'}.`
+        });
+    }
+    if (data.specificOutputs.length) {
+        outputMeasures.push({
+            name: 'Activity Completion Dashboard',
+            type: 'quantitative',
+            description: `Monitor completion metrics: ${data.specificOutputs.slice(0,3).join('; ')}. Build a dashboard updated monthly to track progress toward annual targets.`
+        });
+    }
+    outputMeasures.push({
+        name: 'Dosage & Fidelity Tracking',
+        type: 'quantitative',
+        description: `Track participant attendance rates and program completion percentages. Measure "dosage" (how much of the program each participant receives) to understand the relationship between engagement and outcomes.`
+    });
+    if (data.dataCollection) {
+        outputMeasures.push({
+            name: 'Data Quality Audit',
+            type: 'mixed',
+            description: `Regularly audit your data collection methods (${data.dataCollection}) to ensure accuracy and completeness. Establish data validation protocols and train staff on consistent data entry.`
+        });
+    }
+    suggestions.push({ icon: '&#x1f4c8;', title: 'Output Measures (Activity Tracking)', measures: outputMeasures });
+
+    // SHORT-TERM OUTCOME MEASURES
+    const shortMeasures = [];
+    if (data.shortKnowledge.length) {
+        shortMeasures.push({
+            name: 'Pre/Post Knowledge Assessments',
+            type: 'quantitative',
+            description: `Administer validated pre- and post-assessments to measure changes in knowledge related to: ${data.shortKnowledge.slice(0,2).join('; ')}. Use standardized rubrics for consistent scoring.`
+        });
+    }
+    if (data.shortBehavior.length) {
+        shortMeasures.push({
+            name: 'Behavioral Observation Protocols',
+            type: 'qualitative',
+            description: `Develop structured observation checklists to document behavioral changes: ${data.shortBehavior.slice(0,2).join('; ')}. Train observers for inter-rater reliability.`
+        });
+    }
+    shortMeasures.push({
+        name: 'Participant Satisfaction Surveys',
+        type: 'mixed',
+        description: `Deploy end-of-program surveys combining Likert scales (quantitative) with open-ended feedback (qualitative). Track Net Promoter Score (NPS) as a benchmark. ${data.shortFeedback ? 'Build on your planned approach: ' + data.shortFeedback : ''}`
+    });
+    shortMeasures.push({
+        name: 'Focus Groups & Interviews',
+        type: 'qualitative',
+        description: `Conduct quarterly focus groups with ${data.participantGroups.slice(0,2).join(' and ').toLowerCase() || 'participants'} to gather rich, contextual feedback on program experience, perceived value, and areas for improvement.`
+    });
+    suggestions.push({ icon: '&#x1f31f;', title: 'Short-Term Outcome Measures (1-3 Years)', measures: shortMeasures });
+
+    // MEDIUM-TERM OUTCOME MEASURES
+    const medMeasures = [];
+    if (data.medBehavior.length) {
+        medMeasures.push({
+            name: 'Longitudinal Follow-up Surveys',
+            type: 'quantitative',
+            description: `Survey program alumni at 6-month, 1-year, and 3-year intervals to assess sustained changes: ${data.medBehavior.slice(0,2).join('; ')}. Track retention and continuation of practices.`
+        });
+    }
+    if (data.medSystemic.length) {
+        medMeasures.push({
+            name: 'Organizational Change Indicators',
+            type: 'mixed',
+            description: `Develop indicators to track systemic changes: ${data.medSystemic.slice(0,2).join('; ')}. Use annual partner surveys combined with policy/document review.`
+        });
+    }
+    medMeasures.push({
+        name: 'Case Studies',
+        type: 'qualitative',
+        description: `Develop 3-5 in-depth case studies annually documenting the journey of representative participants or partner organizations. Capture both successes and challenges to inform program refinement.`
+    });
+    medMeasures.push({
+        name: 'Comparison/Benchmarking Analysis',
+        type: 'quantitative',
+        description: `Compare your participants' outcomes against relevant benchmarks (state/national averages, comparison groups, industry standards) to establish evidence that your program makes a difference beyond what would have happened anyway.`
+    });
+    suggestions.push({ icon: '&#x1f4a1;', title: 'Medium-Term Outcome Measures (3-5 Years)', measures: medMeasures });
+
+    // IMPACT MEASURES
+    const impactMeasures = [];
+    if (data.impactPopulation.length) {
+        impactMeasures.push({
+            name: 'Population-Level Data Analysis',
+            type: 'quantitative',
+            description: `Track large-scale indicators related to: ${data.impactPopulation.join('; ')}. Partner with research institutions to analyze longitudinal data and establish causal linkages where possible.`
+        });
+    }
+    if (data.impactSocietal.length) {
+        impactMeasures.push({
+            name: 'Community-Level Impact Assessment',
+            type: 'mixed',
+            description: `Conduct periodic community-level assessments to measure progress toward: ${data.impactSocietal.join('; ')}. Use both quantitative indicators (census data, economic metrics) and qualitative community voice.`
+        });
+    }
+    impactMeasures.push({
+        name: 'Cost-Effectiveness / ROI Analysis',
+        type: 'quantitative',
+        description: `Calculate the return on investment by comparing program costs against the economic and social value generated. Consider cost per participant, cost per outcome achieved, and long-term economic benefits.`
+    });
+    impactMeasures.push({
+        name: 'External Evaluation',
+        type: 'mixed',
+        description: `Engage an external evaluator to conduct an independent assessment of your program's effectiveness. This provides credibility with funders and stakeholders, and identifies blind spots in your internal evaluation.`
+    });
+    suggestions.push({ icon: '&#x1f30d;', title: 'Long-Term Impact Measures (5+ Years)', measures: impactMeasures });
+
+    // EVALUATION INFRASTRUCTURE
+    suggestions.push({
+        icon: '&#x1f6e0;&#xFE0F;',
+        title: 'Evaluation Infrastructure Recommendations',
+        measures: [
+            {
+                name: 'Build an Evaluation Calendar',
+                type: 'mixed',
+                description: 'Create an annual evaluation calendar that maps data collection activities to your program cycle. Include pre/post assessments, surveys, focus groups, and reporting deadlines.'
+            },
+            {
+                name: 'Invest in Data Systems',
+                type: 'quantitative',
+                description: `Establish or strengthen data management systems to centralize your metrics. ${data.dataCollection ? 'Build on your current approach (' + data.dataCollection + ') ' : ''}Consider a centralized dashboard that tracks outputs and outcomes in real-time.`
+            },
+            {
+                name: 'Develop a Learning Agenda',
+                type: 'qualitative',
+                description: 'Create a learning agenda that identifies 3-5 key evaluation questions your organization wants to answer each year. This focuses your evaluation efforts and ensures data is used for continuous improvement, not just reporting.'
+            },
+            {
+                name: 'Stakeholder Feedback Loops',
+                type: 'mixed',
+                description: `Establish regular feedback mechanisms with ${data.participantGroups.join(', ').toLowerCase() || 'your target audience'}, staff, and partners. Use findings to adapt your logic model as you learn what works.`
+            }
+        ]
+    });
+
+    return suggestions;
+}
+
+// ========== UTILITIES ==========
+function esc(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function capitalizeFirst(str) {
+    if (!str || typeof str !== 'string') return str;
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function startOver() {
+    if (!confirm('Are you sure you want to start over? All your responses will be cleared.')) return;
+    document.querySelectorAll('#mainContent input[type="text"], #mainContent textarea').forEach(el => el.value = '');
+    document.querySelectorAll('#mainContent select').forEach(el => el.selectedIndex = 0);
+    document.querySelectorAll('#mainContent input[type="checkbox"]').forEach(el => {
+        el.checked = false;
+        el.closest('label')?.classList.remove('checked');
+    });
+    // Clear saved data from localStorage
+    try {
+        localStorage.removeItem('lm_form_data');
+        localStorage.removeItem('lm_current_step');
+        for (let i = 0; i < 8; i++) {
+            localStorage.removeItem('lm_chat_step_' + i);
+            localStorage.removeItem('lm_chat_step_' + i + '_html');
+        }
+    } catch(e) {}
+    document.getElementById('resultsContainer').classList.remove('active');
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('progressBar').style.display = 'block';
+    if (AI.isActive) showSidebar();
+    showStep(0);
+}
+
+function exportJSON() {
+    const data = collectData();
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (data.orgName || 'logic-model').replace(/\s+/g, '-').toLowerCase() + '-logic-model.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ================================================================
+// ========== AI INTEGRATION ========================================
+// ================================================================
+
+// ========== AI STATE ==========
+const AI = {
+    apiKey: null,
+    isActive: false,
+    isStreaming: false,
+    conversationHistory: [],
+    currentAbortController: null,
+    stepNames: [
+        'About Your Organization', 'Inputs (Resources)', 'Activities',
+        'Outputs', 'Outcomes', 'Long-Term Impacts', 'Theory of Change', 'Review & Generate'
+    ]
+};
+
+// ========== API KEY MANAGEMENT ==========
+function initAI() {
+    const savedKey = localStorage.getItem('lm_anthropic_key');
+    if (savedKey) {
+        AI.apiKey = savedKey;
+        AI.isActive = true;
+        updateAIStatusUI(true);
+        showSidebar();
+        // Try restoring saved conversation first; only trigger fresh greeting if none exists
+        setTimeout(() => {
+            if (!restoreConversationHistory(currentStep)) {
+                triggerStepGreeting(currentStep);
+            }
+        }, 500);
+    } else {
+        showAiSetupOverlay();
+    }
+}
+
+function saveApiKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (!key) {
+        alert('Please enter an API key or click Skip.');
+        return;
+    }
+    AI.apiKey = key;
+    AI.isActive = true;
+    localStorage.setItem('lm_anthropic_key', key);
+    hideAiSetupOverlay();
+    updateAIStatusUI(true);
+    showSidebar();
+    setTimeout(() => triggerStepGreeting(currentStep), 300);
+}
+
+function skipAI() {
+    AI.isActive = false;
+    hideAiSetupOverlay();
+    updateAIStatusUI(false);
+}
+
+function openAiSettings() {
+    document.getElementById('apiKeyInput').value = AI.apiKey || '';
+    showAiSetupOverlay();
+}
+
+function updateAIStatusUI(active) {
+    const badge = document.getElementById('aiHeaderBadge');
+    const aiGenBtn = document.getElementById('aiGenerateBtn');
+    const aiGenHint = document.getElementById('aiGenerateHint');
+    if (badge) badge.style.display = active ? 'inline-flex' : 'none';
+    if (aiGenBtn) aiGenBtn.style.display = active ? 'inline-block' : 'none';
+    if (aiGenHint) aiGenHint.style.display = active ? 'block' : 'none';
+}
+
+function showAiSetupOverlay() {
+    document.getElementById('aiSetupOverlay').classList.remove('ai-overlay--hidden');
+}
+function hideAiSetupOverlay() {
+    document.getElementById('aiSetupOverlay').classList.add('ai-overlay--hidden');
+}
+
+function showSidebar() {
+    document.getElementById('aiCoachSidebar').classList.remove('ai-sidebar--hidden');
+    document.getElementById('aiFab').classList.remove('visible');
+}
+function hideSidebar() {
+    document.getElementById('aiCoachSidebar').classList.add('ai-sidebar--hidden');
+    if (AI.isActive) document.getElementById('aiFab').classList.add('visible');
+}
+function toggleSidebar() {
+    const sb = document.getElementById('aiCoachSidebar');
+    if (sb.classList.contains('ai-sidebar--hidden')) {
+        showSidebar();
+    } else {
+        hideSidebar();
+    }
+}
+
+// ========== CORE API COMMUNICATION (STREAMING) ==========
+async function callClaude(messages, systemPrompt, onChunk, onDone, onError, maxTokens) {
+    if (!AI.apiKey) { onError?.('No API key configured.'); return; }
+
+    if (AI.currentAbortController) AI.currentAbortController.abort();
+    AI.currentAbortController = new AbortController();
+    AI.isStreaming = true;
+
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': AI.apiKey,
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: maxTokens || 1500,
+                system: systemPrompt,
+                messages: messages,
+                stream: true
+            }),
+            signal: AI.currentAbortController.signal
+        });
+
+        if (!response.ok) {
+            const errBody = await response.text();
+            let errMsg = 'API error (' + response.status + ')';
+            try { const j = JSON.parse(errBody); errMsg = j.error?.message || errMsg; } catch(e){}
+            if (response.status === 401) errMsg = 'Invalid API key. Please check your key in Settings.';
+            if (response.status === 429) errMsg = 'Rate limited. Please wait a moment and try again.';
+            if (response.status === 529) errMsg = 'API is overloaded. Please try again shortly.';
+            throw new Error(errMsg);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullText = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const jsonStr = line.slice(6).trim();
+                    if (jsonStr === '[DONE]') continue;
+                    try {
+                        const event = JSON.parse(jsonStr);
+                        if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+                            fullText += event.delta.text;
+                            onChunk?.(event.delta.text, fullText);
+                        }
+                    } catch(e) {}
+                }
+            }
+        }
+
+        AI.isStreaming = false;
+        AI.currentAbortController = null;
+        onDone?.(fullText);
+    } catch (err) {
+        AI.isStreaming = false;
+        AI.currentAbortController = null;
+        if (err.name === 'AbortError') return;
+        onError?.(err.message);
+    }
+}
+
+// ========== SYSTEM PROMPTS ==========
+function buildCoachSystemPrompt(stepIndex) {
+    const data = collectData();
+    const fieldMap = getStepFieldMap(stepIndex);
+    return `You are a friendly, expert logic model consultant embedded in a Logic Model Generator tool. You help users think through their logic model step by step.
+
+CURRENT STEP: ${stepIndex + 1} of 8 — "${AI.stepNames[stepIndex]}"
+
+ORGANIZATION CONTEXT:
+- Name: ${data.orgName || 'Not yet provided'}
+- Type: ${data.orgType || 'Not yet specified'}
+- Mission: ${data.mission || 'Not yet provided'}
+- Target Population: ${data.targetPop || 'Not yet provided'}
+- Program: ${data.programName || 'Not specified'}
+
+DATA ENTERED SO FAR:
+${JSON.stringify(data, null, 2)}
+
+FORM FIELDS FOR THIS STEP:
+${fieldMap}
+
+GUIDELINES:
+- Keep responses concise (2-4 sentences typically). Be warm and encouraging.
+- Tailor examples and suggestions to their specific organization type and mission.
+- Ask follow-up questions that help them think deeper.
+- If a section looks thin, gently encourage more detail.
+- Use plain language. Do NOT use markdown formatting. Use plain text dashes for lists if needed.
+- Be a supportive coach, not a critic.
+
+CRITICAL — EXTRACTING FORM DATA:
+When the user tells you information that could fill form fields for this step, you MUST include a JSON extraction block at the END of your response. This lets the tool offer to auto-fill the form.
+
+The format is: wrap the JSON in |||EXTRACT||| markers like this:
+|||EXTRACT|||
+{"fieldName": "value or array of values"}
+|||EXTRACT|||
+
+The available field names for this step are: ${(() => { try { return Object.keys(JSON.parse(fieldMap.match(/\{[^}]+\}/)?.[0] || '{}')).join(', '); } catch(e) { return 'see FORM FIELDS above'; } })()}
+
+Rules for extraction:
+- Only include fields where the user provided clear, specific information in this conversation
+- For array fields (like staffRoles, partnerships), provide an array of strings
+- For checkbox fields (like funding, activityTypes, participantGroups), match the exact values from the field options listed above
+- Do NOT extract data the user hasn't actually discussed
+- Include the extraction block AFTER your conversational response text
+- If the user is just asking questions and hasn't given concrete answers yet, do NOT include an extraction block — just chat naturally
+- If the user says something like "apply that" or "fill that in", extract from the recent conversation
+- IMPORTANT: Always capitalize the first letter of every value. Write complete, professional phrases. For example: "Increased digital literacy" not "increased digital literacy".
+
+PROVIDING SUGGESTIONS:
+You should ALWAYS provide helpful, tailored suggestions. After your conversational response and any EXTRACT block, include a SUGGEST block with suggested values the user might want to add:
+|||SUGGEST|||
+{"fieldName": ["Suggestion 1", "Suggestion 2", "Suggestion 3"]}
+|||SUGGEST|||
+
+Rules for suggestions:
+- Always provide 3-5 suggestions relevant to the current step and the user's organization
+- Tailor suggestions to their org type, mission, and target population
+- Suggestions should be specific and actionable, not generic
+- Always capitalize the first letter of every suggestion
+- For checkbox fields, suggest from the exact option values listed in the field map
+- Keep the SUGGEST block AFTER any EXTRACT block
+- Even if you include an EXTRACT block, still provide additional suggestions for fields they haven't filled yet
+- Do NOT repeat values the user has already provided`;
+}
+
+function getStepFieldMap(stepIndex) {
+    const maps = [
+        `Step 0 fields: {"orgName":"string","orgType":"one of: Ed-Tech Company, Nonprofit Organization, K-12 School/District, Higher Education Institution, Workforce Development, Government Agency, Social Enterprise, Corporate Training","mission":"string","targetPop":"string","programName":"string"}`,
+        `Step 1 fields: {"funding":"array, values from: Federal/State Grants, Private Foundation Grants, Venture Capital/Investors, Revenue/Sales, Donations, Subscriptions/Licensing, Corporate Sponsorship, In-kind Support","staffRoles":"array of strings","partnerships":"array of strings","techAssets":"array of strings","otherInputs":"string"}`,
+        `Step 2 fields: {"activityTypes":"array, values from: Teaching/Instruction, Coaching/Mentoring, Professional Development/Training, Workshops/Seminars, Assessments/Testing, Curriculum Development, Software/Platform Development, Research/Data Collection, Community Engagement, Technical Support","activityDetails":"array of strings","activityFrequency":"one of: Daily, Weekly, Monthly, Quarterly, Annually, Ongoing/Continuous, Varies by program","deliveryMode":"one of: In-person, Fully online/virtual, Hybrid (in-person + online), Self-paced digital platform, Multiple modes"}`,
+        `Step 3 fields: {"participantGroups":"array, values from: Students, Teachers/Educators, Administrators, Parents/Families, Working Professionals, Community Members, Organizations/Schools","annualParticipants":"string","specificOutputs":"array of strings","dataCollection":"string"}`,
+        `Step 4 fields: {"shortKnowledge":"array of strings","shortBehavior":"array of strings","shortFeedback":"string","medBehavior":"array of strings","medSystemic":"array of strings"}`,
+        `Step 5 fields: {"impactPopulation":"array of strings","impactSocietal":"array of strings","impactEvidence":"string"}`,
+        `Step 6 fields: {"coreProblem":"string","whyApproach":"string","assumptions":"array of strings","externalFactors":"array of strings"}`,
+        `Step 7: Review step — no fields to fill. Just review their data and suggest improvements.`
+    ];
+    return maps[stepIndex] || '';
+}
+
+function buildGenerationSystemPrompt() {
+    return `You are an expert evaluation consultant. Generate a polished logic model enhancement based on the organization data provided.
+
+Respond ONLY with a JSON object (no markdown fences, no commentary) using this exact structure:
+{
+  "theoryOfChange": "A polished 2-3 paragraph Theory of Change narrative that connects the problem, approach, activities, outcomes, and long-term impacts in a compelling causal story.",
+  "sectionEnhancements": {
+    "inputs": "1-2 sentence analysis of their inputs and any considerations.",
+    "activities": "1-2 sentence analysis of their activities.",
+    "outputs": "1-2 sentence analysis of their outputs.",
+    "shortTermOutcomes": "1-2 sentence analysis of short-term outcomes.",
+    "mediumTermOutcomes": "1-2 sentence analysis of medium-term outcomes.",
+    "impacts": "1-2 sentence analysis of their impact goals."
+  },
+  "additionalMeasures": [
+    {"name": "Measure name", "type": "quantitative or qualitative or mixed", "description": "Detailed description tailored to their org."}
+  ],
+  "gaps": [
+    {"area": "Section name", "observation": "What seems missing", "suggestion": "Specific recommendation"}
+  ],
+  "suggestedAdditions": {
+    "inputs": ["suggestion"],
+    "activities": ["suggestion"],
+    "outputs": ["suggestion"],
+    "outcomes": ["suggestion"],
+    "impacts": ["suggestion"]
+  }
+}
+
+Be specific and contextual. The Theory of Change should be publication-quality. Provide 3-5 additional measures and 2-4 gaps. Return ONLY valid JSON.`;
+}
+
+// ========== AI COACH SIDEBAR FUNCTIONS ==========
+function triggerStepGreeting(stepIndex) {
+    if (!AI.isActive) return;
+    const messagesEl = document.getElementById('aiMessages');
+    messagesEl.innerHTML = '';
+    AI.conversationHistory = [];
+
+    const data = collectData();
+    const prompt = getStepGreetingPrompt(stepIndex, data);
+    AI.conversationHistory.push({ role: 'user', content: prompt });
+
+    const msgEl = appendAssistantMessage();
+    callClaude(
+        AI.conversationHistory,
+        buildCoachSystemPrompt(stepIndex),
+        (chunk, full) => updateStreamingMessage(msgEl, full),
+        (fullText) => {
+            finalizeMessage(msgEl, fullText);
+            AI.conversationHistory.push({ role: 'assistant', content: fullText });
+        },
+        (err) => showErrorMessage(msgEl, err)
+    );
+}
+
+function getStepGreetingPrompt(stepIndex, data) {
+    const prompts = [
+        `I just started the Logic Model Generator. ${data.orgName ? 'I\'ve entered my org name as "' + data.orgName + '".' : ''} Walk me through each field on this page one at a time — starting with organization type. Ask me about each field, offer suggestions for what to enter, and help me think through my answers.`,
+        `I'm now on the Inputs section. Ask me about the resources my ${data.orgType || 'organization'} needs. For each question, give me some tailored suggestions I can pick from based on what you know about my organization.`,
+        `I'm on the Activities section now. Ask me about what activities are most important for a ${data.orgType || 'organization'} serving ${data.targetPop || 'my target audience'}. Provide specific suggestions I can choose from.`,
+        `I'm on Outputs now. Ask me about what specific, countable things my program will produce — like number of participants served, sessions held, or materials created. Provide tailored suggestions.`,
+        `I'm on the Outcomes section. This covers both short-term (1-3 years) and medium-term (3-5 years). Ask me about what changes I expect to see from my work with ${data.targetPop || 'my audience'}. Suggest specific outcomes I might want to track.`,
+        `I'm on the Impacts section — the long-term vision (5+ years). Help me think big but realistic about what lasting change my organization can achieve. Suggest specific impact statements.`,
+        `I'm on Theory of Change now. Help me articulate WHY my approach will work and what assumptions I'm making. My activities include: ${(data.activityTypes || []).join(', ') || 'not yet specified'}. Suggest key assumptions and external factors.`,
+        `I'm on the Review step. Can you quickly scan what I've entered and let me know if any sections look thin or if I should strengthen anything before generating?`
+    ];
+    return prompts[stepIndex] || 'Help me with this section of the logic model.';
+}
+
+function sendUserMessage() {
+    const input = document.getElementById('aiChatInput');
+    const text = input.value.trim();
+    if (!text || AI.isStreaming) return;
+    input.value = '';
+    appendUserMessage(text);
+    AI.conversationHistory.push({ role: 'user', content: text });
+
+    const msgEl = appendAssistantMessage();
+    callClaude(
+        AI.conversationHistory,
+        buildCoachSystemPrompt(currentStep),
+        (chunk, full) => updateStreamingMessage(msgEl, full),
+        (fullText) => {
+            finalizeMessage(msgEl, fullText);
+            AI.conversationHistory.push({ role: 'assistant', content: fullText });
+        },
+        (err) => showErrorMessage(msgEl, err)
+    );
+}
+
+function appendUserMessage(text) {
+    const el = document.getElementById('aiMessages');
+    const msg = document.createElement('div');
+    msg.className = 'ai-message ai-message--user';
+    msg.textContent = text;
+    el.appendChild(msg);
+    el.scrollTop = el.scrollHeight;
+}
+
+function appendAssistantMessage() {
+    const el = document.getElementById('aiMessages');
+    const msg = document.createElement('div');
+    msg.className = 'ai-message ai-message--assistant';
+    msg.innerHTML = '<span class="ai-cursor"></span>';
+    el.appendChild(msg);
+    el.scrollTop = el.scrollHeight;
+    return msg;
+}
+
+function updateStreamingMessage(msgEl, fullText) {
+    msgEl.innerHTML = escapeForSidebar(fullText) + '<span class="ai-cursor"></span>';
+    const container = document.getElementById('aiMessages');
+    container.scrollTop = container.scrollHeight;
+}
+
+function finalizeMessage(msgEl, fullText) {
+    let displayText = fullText;
+
+    // Remove extraction and suggestion blocks from displayed text
+    displayText = displayText.replace(/\|\|\|EXTRACT\|\|\|[\s\S]*?\|\|\|EXTRACT\|\|\|/g, '');
+    displayText = displayText.replace(/\|\|\|SUGGEST\|\|\|[\s\S]*?\|\|\|SUGGEST\|\|\|/g, '');
+    displayText = displayText.trim();
+    msgEl.innerHTML = escapeForSidebar(displayText);
+
+    // Handle EXTRACT block — data the user provided, offer to apply
+    const extractMatch = fullText.match(/\|\|\|EXTRACT\|\|\|([\s\S]*?)\|\|\|EXTRACT\|\|\|/);
+    if (extractMatch) {
+        try {
+            const extracted = JSON.parse(extractMatch[1].trim());
+            AI.pendingExtraction = extracted;
+
+            const previewItems = Object.entries(extracted).map(([key, val]) => {
+                const display = Array.isArray(val) ? val.join(', ') : val;
+                return '<div class="ai-extract-item">- <strong>' + esc(key) + ':</strong> ' + esc(String(display).substring(0, 80)) + (String(display).length > 80 ? '...' : '') + '</div>';
+            }).join('');
+
+            const applyBar = document.createElement('div');
+            applyBar.innerHTML = '<div class="ai-extract-preview">' + previewItems + '</div>' +
+                '<div class="ai-apply-bar"><button class="ai-apply-btn" onclick="applyExtractedData(this)">&#x2705; Apply to Form</button></div>';
+            msgEl.appendChild(applyBar);
+        } catch(e) {
+            console.warn('Could not parse extraction JSON:', e);
+        }
+    }
+
+    // Handle SUGGEST block — clickable suggestion chips
+    const suggestMatch = fullText.match(/\|\|\|SUGGEST\|\|\|([\s\S]*?)\|\|\|SUGGEST\|\|\|/);
+    if (suggestMatch) {
+        try {
+            const suggestions = JSON.parse(suggestMatch[1].trim());
+            const suggestContainer = document.createElement('div');
+            suggestContainer.style.marginTop = '0.5rem';
+
+            // Field display names for labels
+            const fieldLabels = {
+                orgName: 'Organization Name', orgType: 'Organization Type', mission: 'Mission',
+                targetPop: 'Target Population', programName: 'Program Name',
+                funding: 'Funding Sources', staffRoles: 'Staff Roles', partnerships: 'Partnerships',
+                techAssets: 'Technology & Assets', otherInputs: 'Other Resources',
+                activityTypes: 'Activity Types', activityDetails: 'Activities',
+                activityFrequency: 'Frequency', deliveryMode: 'Delivery Mode',
+                participantGroups: 'Participant Groups', annualParticipants: 'Annual Participants',
+                specificOutputs: 'Outputs', dataCollection: 'Data Collection',
+                shortKnowledge: 'Knowledge Outcomes', shortBehavior: 'Behavioral Outcomes',
+                shortFeedback: 'Feedback Metrics', medBehavior: 'Medium-term Practices',
+                medSystemic: 'Systemic Changes', impactPopulation: 'Population Impact',
+                impactSocietal: 'Societal Impact', impactEvidence: 'Evidence of Success',
+                coreProblem: 'Core Problem', whyApproach: 'Why This Works',
+                assumptions: 'Assumptions', externalFactors: 'External Factors'
+            };
+
+            Object.entries(suggestions).forEach(([field, items]) => {
+                if (!items || !items.length) return;
+                const group = document.createElement('div');
+                group.className = 'ai-suggest-group';
+                group.innerHTML = '<div class="ai-suggest-label">' + esc(fieldLabels[field] || field) + '</div>';
+                const chipsDiv = document.createElement('div');
+                chipsDiv.className = 'ai-suggest-chips';
+                items.forEach(item => {
+                    const chip = document.createElement('button');
+                    chip.className = 'ai-suggest-chip';
+                    chip.innerHTML = '<span class="chip-icon"></span> ' + esc(capitalizeFirst(String(item)));
+                    chip.onclick = function() {
+                        if (this.classList.contains('added')) return;
+                        applySuggestionChip(field, item);
+                        this.classList.add('added');
+                    };
+                    chipsDiv.appendChild(chip);
+                });
+                group.appendChild(chipsDiv);
+                suggestContainer.appendChild(group);
+            });
+
+            msgEl.appendChild(suggestContainer);
+        } catch(e) {
+            console.warn('Could not parse suggestion JSON:', e);
+        }
+    }
+
+    // Auto-save conversation
+    saveConversationHistory();
+}
+
+function applyExtractedData(btn) {
+    if (!AI.pendingExtraction) return;
+    const data = AI.pendingExtraction;
+
+    Object.entries(data).forEach(([field, value]) => {
+        applyFieldValue(field, value);
+    });
+
+    btn.textContent = 'Applied!';
+    btn.classList.add('applied');
+    AI.pendingExtraction = null;
+
+    // Auto-save form state after applying
+    saveFormData();
+
+    // Flash a success message
+    showAutosaveIndicator('Applied to form!');
+}
+
+function applyFieldValue(field, value) {
+    // Auto-capitalize values
+    if (typeof value === 'string') {
+        value = capitalizeFirst(value.trim());
+    } else if (Array.isArray(value)) {
+        value = value.map(v => typeof v === 'string' ? capitalizeFirst(v.trim()) : v);
+    }
+
+    // Text inputs and textareas
+    const textFields = ['orgName','mission','targetPop','programName','otherInputs',
+        'annualParticipants','dataCollection','shortFeedback','impactEvidence',
+        'coreProblem','whyApproach'];
+    if (textFields.includes(field)) {
+        const el = document.getElementById(field);
+        if (el && value) el.value = value;
+        return;
+    }
+
+    // Select dropdowns
+    const selectFields = ['orgType','activityFrequency','deliveryMode'];
+    if (selectFields.includes(field)) {
+        const el = document.getElementById(field);
+        if (el && value) {
+            // Try exact match first, then partial
+            for (let opt of el.options) {
+                if (opt.value === value || opt.value.toLowerCase().includes(value.toLowerCase())) {
+                    el.value = opt.value;
+                    el.dispatchEvent(new Event('change'));
+                    break;
+                }
+            }
+        }
+        return;
+    }
+
+    // Checkbox groups
+    const checkboxMap = {
+        'funding': 'fundingSources',
+        'activityTypes': 'activityTypes',
+        'participantGroups': 'participantGroups'
+    };
+    if (checkboxMap[field] && Array.isArray(value)) {
+        const container = document.getElementById(checkboxMap[field]);
+        if (container) {
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                const shouldCheck = value.some(v =>
+                    cb.value.toLowerCase().includes(v.toLowerCase()) ||
+                    v.toLowerCase().includes(cb.value.toLowerCase())
+                );
+                if (shouldCheck && !cb.checked) {
+                    cb.checked = true;
+                    cb.closest('label')?.classList.add('checked');
+                }
+            });
+        }
+        return;
+    }
+
+    // Dynamic list fields (arrays of strings)
+    const listFields = {
+        'staffRoles':'staffRoles','partnerships':'partnerships','techAssets':'techAssets',
+        'activityDetails':'activityDetails','specificOutputs':'specificOutputs',
+        'shortKnowledge':'shortKnowledge','shortBehavior':'shortBehavior',
+        'medBehavior':'medBehavior','medSystemic':'medSystemic',
+        'impactPopulation':'impactPopulation','impactSocietal':'impactSocietal',
+        'assumptions':'assumptions','externalFactors':'externalFactors'
+    };
+    if (listFields[field] && Array.isArray(value)) {
+        const containerId = listFields[field];
+        const container = document.getElementById(containerId);
+        if (container) {
+            // Fill existing empty inputs first, then add new ones
+            const existingInputs = container.querySelectorAll('input[type="text"]');
+            let inputIdx = 0;
+
+            value.forEach(item => {
+                // Find next empty input or create new one
+                while (inputIdx < existingInputs.length && existingInputs[inputIdx].value.trim()) {
+                    inputIdx++;
+                }
+                if (inputIdx < existingInputs.length) {
+                    existingInputs[inputIdx].value = item;
+                    inputIdx++;
+                } else {
+                    // Add new input
+                    addListItem(containerId, '');
+                    const newInputs = container.querySelectorAll('input[type="text"]');
+                    newInputs[newInputs.length - 1].value = item;
+                }
+            });
+        }
+        return;
+    }
+}
+
+function applySuggestionChip(field, value) {
+    value = capitalizeFirst(String(value).trim());
+
+    // For text fields — only set if empty, otherwise append
+    const textFields = ['orgName','mission','targetPop','programName','otherInputs',
+        'annualParticipants','dataCollection','shortFeedback','impactEvidence',
+        'coreProblem','whyApproach'];
+    if (textFields.includes(field)) {
+        const el = document.getElementById(field);
+        if (el) {
+            if (!el.value.trim()) {
+                el.value = value;
+            } else {
+                el.value = el.value.trim() + '. ' + value;
+            }
+        }
+        saveFormData();
+        showAutosaveIndicator('Added!');
+        return;
+    }
+
+    // For select fields
+    const selectFields = ['orgType','activityFrequency','deliveryMode'];
+    if (selectFields.includes(field)) {
+        const el = document.getElementById(field);
+        if (el) {
+            for (let opt of el.options) {
+                if (opt.value === value || opt.value.toLowerCase().includes(value.toLowerCase())) {
+                    el.value = opt.value;
+                    el.dispatchEvent(new Event('change'));
+                    break;
+                }
+            }
+        }
+        saveFormData();
+        showAutosaveIndicator('Added!');
+        return;
+    }
+
+    // For checkbox groups
+    const checkboxMap = {
+        'funding': 'fundingSources',
+        'activityTypes': 'activityTypes',
+        'participantGroups': 'participantGroups'
+    };
+    if (checkboxMap[field]) {
+        const container = document.getElementById(checkboxMap[field]);
+        if (container) {
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                if (cb.value.toLowerCase().includes(value.toLowerCase()) ||
+                    value.toLowerCase().includes(cb.value.toLowerCase())) {
+                    if (!cb.checked) {
+                        cb.checked = true;
+                        cb.closest('label')?.classList.add('checked');
+                    }
+                }
+            });
+        }
+        saveFormData();
+        showAutosaveIndicator('Added!');
+        return;
+    }
+
+    // For dynamic list fields — add as a new item
+    const listFields = {
+        'staffRoles':'staffRoles','partnerships':'partnerships','techAssets':'techAssets',
+        'activityDetails':'activityDetails','specificOutputs':'specificOutputs',
+        'shortKnowledge':'shortKnowledge','shortBehavior':'shortBehavior',
+        'medBehavior':'medBehavior','medSystemic':'medSystemic',
+        'impactPopulation':'impactPopulation','impactSocietal':'impactSocietal',
+        'assumptions':'assumptions','externalFactors':'externalFactors'
+    };
+    if (listFields[field]) {
+        const containerId = listFields[field];
+        const container = document.getElementById(containerId);
+        if (container) {
+            // Check if value already exists
+            const existing = Array.from(container.querySelectorAll('input[type="text"]'));
+            const alreadyExists = existing.some(inp => inp.value.trim().toLowerCase() === value.toLowerCase());
+            if (alreadyExists) {
+                showAutosaveIndicator('Already added');
+                return;
+            }
+            // Find empty input or add new one
+            const emptyInput = existing.find(inp => !inp.value.trim());
+            if (emptyInput) {
+                emptyInput.value = value;
+            } else {
+                addListItem(containerId, '');
+                const newInputs = container.querySelectorAll('input[type="text"]');
+                newInputs[newInputs.length - 1].value = value;
+            }
+        }
+        saveFormData();
+        showAutosaveIndicator('Added!');
+        return;
+    }
+}
+
+function showErrorMessage(msgEl, error) {
+    msgEl.className = 'ai-message ai-message--error';
+    msgEl.innerHTML = 'Error: ' + esc(error);
+    if (error.includes('API key') || error.includes('401')) {
+        msgEl.innerHTML += '<br><a href="#" onclick="openAiSettings();return false;" style="color:var(--ai-purple);">Check API key</a>';
+    }
+}
+
+function escapeForSidebar(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML.replace(/\n/g, '<br>');
+}
+
+// ========== AI-ENHANCED GENERATION ==========
+async function generateWithAI() {
+    const data = collectData();
+    if (!data.orgName || !data.mission) {
+        alert('Please complete at least the organization information.');
+        return;
+    }
+
+    showGeneratingOverlay();
+    const userMessage = 'Generate enhanced logic model output for this organization:\n\n' + JSON.stringify(data, null, 2);
+    let fullResponse = '';
+
+    callClaude(
+        [{ role: 'user', content: userMessage }],
+        buildGenerationSystemPrompt(),
+        (chunk, full) => { fullResponse = full; updateGeneratingPreview(full); },
+        (fullText) => {
+            try {
+                let cleaned = fullText.trim();
+                if (cleaned.startsWith('```')) cleaned = cleaned.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+                const aiResult = JSON.parse(cleaned);
+                hideGeneratingOverlay();
+                renderEnhancedResults(data, aiResult);
+            } catch(e) {
+                console.error('AI parse error:', e);
+                hideGeneratingOverlay();
+                generateModel();
+                showAIFallbackNotice('AI response could not be parsed. Showing standard generation.');
+            }
+        },
+        (err) => {
+            hideGeneratingOverlay();
+            generateModel();
+            showAIFallbackNotice('AI generation failed: ' + err + '. Showing standard generation.');
+        },
+        4000
+    );
+}
+
+function renderEnhancedResults(data, aiResult) {
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('progressBar').style.display = 'none';
+    document.getElementById('aiCoachSidebar')?.classList.add('ai-sidebar--hidden');
+    document.getElementById('aiFab')?.classList.remove('visible');
+    document.getElementById('resultsContainer').classList.add('active');
+
+    populatePrintTitlePage(data);
+    renderLogicModel(data);
+
+    // AI-enhanced Theory of Change
+    if (aiResult.theoryOfChange) {
+        const tocEl = document.getElementById('tocOutput');
+        tocEl.innerHTML = '<div class="toc-box"><h3>Theory of Change <span class="ai-badge">AI-Enhanced</span></h3><p>' + escapeForSidebar(aiResult.theoryOfChange) + '</p></div>';
+    } else {
+        renderTheoryOfChange(data);
+    }
+
+    // Detail sections with AI enhancements
+    renderDetailSections(data);
+    if (aiResult.sectionEnhancements) {
+        const sectionKeys = ['inputs','activities','outputs','shortTermOutcomes','mediumTermOutcomes','impacts'];
+        const detailSections = document.querySelectorAll('#detailSections .detail-section');
+        sectionKeys.forEach((key, i) => {
+            if (aiResult.sectionEnhancements[key] && detailSections[i]) {
+                const content = detailSections[i].querySelector('.detail-content');
+                if (content) {
+                    const aiDiv = document.createElement('div');
+                    aiDiv.style.cssText = 'margin-top:1rem;padding:0.75rem;background:var(--ai-purple-bg);border-radius:8px;border-left:3px solid var(--ai-purple);';
+                    aiDiv.innerHTML = '<div style="font-size:0.72rem;font-weight:600;color:var(--ai-purple);margin-bottom:0.25rem;">AI Analysis</div><p style="font-size:0.85rem;margin:0;">' + escapeForSidebar(aiResult.sectionEnhancements[key]) + '</p>';
+                    content.appendChild(aiDiv);
+                }
+            }
+        });
+    }
+
+    // Measurement suggestions (template + AI)
+    renderMeasurementSuggestions(data);
+    if (aiResult.additionalMeasures && aiResult.additionalMeasures.length) {
+        const measEl = document.getElementById('measurementSuggestions');
+        const aiSection = document.createElement('div');
+        aiSection.innerHTML = '<h3 style="font-size:1rem;margin:1.5rem 0 0.75rem;color:var(--ai-purple);">Additional AI-Suggested Measures <span class="ai-badge">AI-Enhanced</span></h3>' +
+            aiResult.additionalMeasures.map(m => '<div class="measure-card"><span class="measure-type ' + esc(m.type) + '">' + esc(m.type) + '</span><h4>' + esc(m.name) + '</h4><p>' + esc(m.description) + '</p></div>').join('');
+        measEl.appendChild(aiSection);
+    }
+
+    // Gaps analysis
+    if (aiResult.gaps && aiResult.gaps.length) {
+        const detailEl = document.getElementById('detailSections');
+        detailEl.insertAdjacentHTML('beforeend', '<div class="detail-section" style="border-left:3px solid var(--ai-purple);"><h3 onclick="this.querySelector(\'.toggle\').classList.toggle(\'open\');this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';"><span>Gaps &amp; Recommendations</span><span class="ai-badge">AI Analysis</span><span class="toggle open" style="margin-left:auto;">&#x25B6;</span></h3><div class="detail-content">' +
+            aiResult.gaps.map(g => '<div style="margin-bottom:0.75rem;padding:0.75rem;background:#fffbeb;border-radius:8px;border-left:3px solid var(--accent);"><strong style="color:var(--accent);">' + esc(g.area) + '</strong><p style="font-size:0.85rem;margin:0.3rem 0;">' + esc(g.observation) + '</p><p style="font-size:0.85rem;color:var(--primary);margin:0;"><strong>Suggestion:</strong> ' + esc(g.suggestion) + '</p></div>').join('') +
+            '</div></div>');
+    }
+
+    // Suggested additions
+    if (aiResult.suggestedAdditions) {
+        const areas = Object.entries(aiResult.suggestedAdditions).filter(([k,v]) => v && v.length);
+        if (areas.length) {
+            const detailEl = document.getElementById('detailSections');
+            detailEl.insertAdjacentHTML('beforeend', '<div class="detail-section" style="border-left:3px solid var(--success);"><h3 onclick="this.querySelector(\'.toggle\').classList.toggle(\'open\');this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';"><span>Suggested Additions</span><span class="ai-badge">AI Suggestions</span><span class="toggle open" style="margin-left:auto;">&#x25B6;</span></h3><div class="detail-content">' +
+                areas.map(([area, items]) => '<p><strong>' + area.charAt(0).toUpperCase() + area.slice(1) + ':</strong></p><ul>' + items.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>').join('') +
+                '</div></div>');
+        }
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showGeneratingOverlay() {
+    const overlay = document.createElement('div');
+    overlay.id = 'aiGeneratingOverlay';
+    overlay.className = 'ai-generating-overlay';
+    overlay.innerHTML = '<div class="ai-generating-spinner"></div><div class="ai-generating-status">Generating your AI-enhanced logic model...</div><div class="ai-generating-stream" id="aiStreamPreview"></div>';
+    document.body.appendChild(overlay);
+}
+function hideGeneratingOverlay() {
+    const o = document.getElementById('aiGeneratingOverlay');
+    if (o) o.remove();
+}
+function updateGeneratingPreview(text) {
+    const p = document.getElementById('aiStreamPreview');
+    if (p) p.textContent = text.length > 300 ? '...' + text.slice(-300) : text;
+}
+function showAIFallbackNotice(msg) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:1rem;margin:1rem 0;font-size:0.9rem;text-align:center;color:#92400e;';
+    banner.textContent = msg;
+    document.getElementById('logicModelOutput')?.insertAdjacentElement('beforebegin', banner);
+}
+
+// ========== AUTO-SAVE & RESTORE ==========
+function saveFormData() {
+    try {
+        const data = collectData();
+        localStorage.setItem('lm_form_data', JSON.stringify(data));
+        localStorage.setItem('lm_current_step', currentStep.toString());
+    } catch(e) { console.warn('Save failed:', e); }
+}
+
+function restoreFormData() {
+    try {
+        const saved = localStorage.getItem('lm_form_data');
+        if (!saved) return false;
+        const data = JSON.parse(saved);
+        if (!data.orgName && !data.mission) return false;
+
+        // Restore text fields
+        const textMap = {
+            orgName:'orgName', mission:'mission', targetPop:'targetPop',
+            programName:'programName', otherInputs:'otherInputs',
+            annualParticipants:'annualParticipants', dataCollection:'dataCollection',
+            shortFeedback:'shortFeedback', impactEvidence:'impactEvidence',
+            coreProblem:'coreProblem', whyApproach:'whyApproach'
+        };
+        Object.entries(textMap).forEach(([key, id]) => {
+            const el = document.getElementById(id);
+            if (el && data[key]) el.value = data[key];
+        });
+
+        // Restore selects
+        ['orgType','activityFrequency','deliveryMode'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && data[id]) {
+                el.value = data[id];
+                el.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Restore checkboxes
+        const cbMap = { funding:'fundingSources', activityTypes:'activityTypes', participantGroups:'participantGroups' };
+        Object.entries(cbMap).forEach(([key, containerId]) => {
+            if (data[key] && data[key].length) {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        if (data[key].includes(cb.value)) {
+                            cb.checked = true;
+                            cb.closest('label')?.classList.add('checked');
+                        }
+                    });
+                }
+            }
+        });
+
+        // Restore dynamic lists
+        const listMap = {
+            staffRoles:'staffRoles', partnerships:'partnerships', techAssets:'techAssets',
+            activityDetails:'activityDetails', specificOutputs:'specificOutputs',
+            shortKnowledge:'shortKnowledge', shortBehavior:'shortBehavior',
+            medBehavior:'medBehavior', medSystemic:'medSystemic',
+            impactPopulation:'impactPopulation', impactSocietal:'impactSocietal',
+            assumptions:'assumptions', externalFactors:'externalFactors'
+        };
+        Object.entries(listMap).forEach(([key, containerId]) => {
+            if (data[key] && data[key].length) {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    const inputs = container.querySelectorAll('input[type="text"]');
+                    data[key].forEach((val, i) => {
+                        if (i < inputs.length) {
+                            inputs[i].value = val;
+                        } else {
+                            addListItem(containerId, '');
+                            const newInputs = container.querySelectorAll('input[type="text"]');
+                            newInputs[newInputs.length - 1].value = val;
+                        }
+                    });
+                }
+            }
+        });
+
+        return true;
+    } catch(e) { console.warn('Restore failed:', e); return false; }
+}
+
+function saveConversationHistory() {
+    try {
+        // Save per-step conversation
+        const key = 'lm_chat_step_' + currentStep;
+        localStorage.setItem(key, JSON.stringify(AI.conversationHistory));
+        // Also save the rendered HTML for quick display
+        const html = document.getElementById('aiMessages')?.innerHTML || '';
+        localStorage.setItem(key + '_html', html);
+    } catch(e) {}
+}
+
+function restoreConversationHistory(stepIndex) {
+    try {
+        const key = 'lm_chat_step_' + stepIndex;
+        const history = localStorage.getItem(key);
+        const html = localStorage.getItem(key + '_html');
+        if (history && html) {
+            AI.conversationHistory = JSON.parse(history);
+            document.getElementById('aiMessages').innerHTML = html;
+            // Disable any "Apply" buttons that were already applied
+            document.querySelectorAll('.ai-apply-btn.applied').forEach(btn => {
+                btn.disabled = true;
+            });
+            return true;
+        }
+    } catch(e) {}
+    return false;
+}
+
+function showAutosaveIndicator(text) {
+    const el = document.getElementById('autosaveIndicator');
+    if (el) {
+        el.textContent = text || 'Saved';
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 1500);
+    }
+}
+
+// Auto-save form data periodically when user interacts
+let _autoSaveTimer = null;
+function scheduleAutoSave() {
+    clearTimeout(_autoSaveTimer);
+    _autoSaveTimer = setTimeout(() => {
+        saveFormData();
+        showAutosaveIndicator();
+    }, 2000);
+}
+
+// ========== HOOK INTO EXISTING NAVIGATION ==========
+const _originalShowStep = showStep;
+showStep = function(step) {
+    _originalShowStep(step);
+    if (AI.isActive && step < 8) {
+        // Try restoring saved conversation first; if none, trigger fresh greeting
+        if (!restoreConversationHistory(step)) {
+            triggerStepGreeting(step);
+        }
+    }
+    // Save current step for restore
+    try { localStorage.setItem('lm_current_step', step.toString()); } catch(e) {}
+};
+
+// ========== AI EVENT LISTENERS ==========
+document.getElementById('aiChatInput')?.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendUserMessage();
+    }
+});
+
+// Auto-save on form changes
+document.addEventListener('input', function(e) {
+    if (e.target.closest('#mainContent')) scheduleAutoSave();
+});
+document.addEventListener('change', function(e) {
+    if (e.target.closest('#mainContent')) scheduleAutoSave();
+});
+
+// ========== INIT ON LOAD ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Restore form data first
+    const restored = restoreFormData();
+    if (restored) {
+        const savedStep = parseInt(localStorage.getItem('lm_current_step') || '0');
+        if (savedStep > 0) {
+            // Use the original showStep to avoid triggering AI greeting during init
+            _originalShowStep(savedStep);
+        }
+    }
+    // Then init AI (which may restore conversation for the current step)
+    initAI();
+});
+</script>
+
+</body>
+</html>
