@@ -241,6 +241,22 @@
             flex-shrink: 0;
             align-self: center;
         }
+        /* Paired rows (participant targets) */
+        .paired-row .pair-group { flex: 3; }
+        .paired-row .pair-count { flex: 1; min-width: 80px; }
+
+        /* Quantitative target rows */
+        .quant-row { flex-wrap: wrap; }
+        .quant-row .qt-metric { flex: 2; min-width: 140px; }
+        .quant-row .qt-baseline { flex: 0.7; min-width: 70px; }
+        .quant-row .qt-target { flex: 0.7; min-width: 70px; }
+        .quant-row .qt-timeframe {
+            flex: 1; min-width: 100px;
+            padding: 0.6rem 0.75rem; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--input-bg);
+            font-size: 0.9rem; font-family: inherit; color: var(--text);
+        }
+
         .add-btn {
             display: inline-flex;
             align-items: center;
@@ -470,6 +486,24 @@
         .measure-type.qualitative { background: #fef9e7; color: #f39c12; }
         .measure-type.mixed { background: #f4ecf7; color: #8e44ad; }
         .measure-card p { font-size: 0.85rem; color: var(--text-light); }
+        .measure-card { position: relative; }
+        .measure-actions {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            display: flex; gap: 0.25rem; opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .measure-card:hover .measure-actions { opacity: 1; }
+        .measure-edit-btn, .measure-delete-btn {
+            width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border);
+            background: white; cursor: pointer; font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .measure-edit-btn:hover { background: #eef; border-color: var(--ai-purple); }
+        .measure-delete-btn:hover { background: #fee; border-color: #c0392b; color: #c0392b; }
+        .measure-add-btn { margin-top: 0.5rem; }
+        .measure-edit-form input, .measure-edit-form textarea {
+            border: 1px solid var(--border); border-radius: 6px; font-family: inherit;
+        }
 
         /* PRINT BUTTON */
         .action-bar {
@@ -626,6 +660,7 @@
             .measure-type.quantitative { background: #e8f8f5 !important; color: #1abc9c !important; }
             .measure-type.qualitative { background: #fef9e7 !important; color: #f39c12 !important; }
             .measure-type.mixed { background: #f4ecf7 !important; color: #8e44ad !important; }
+            .measure-actions, .measure-add-btn, .measure-edit-form { display: none !important; }
 
             /* Section headers in print */
             #detailSections > h2, #measurementSuggestions > h2 {
@@ -1096,6 +1131,10 @@
                     <label><input type="checkbox" value="Subscriptions/Licensing"> Subscriptions</label>
                     <label><input type="checkbox" value="Corporate Sponsorship"> Corporate Sponsors</label>
                     <label><input type="checkbox" value="In-kind Support"> In-kind Support</label>
+                    <label><input type="checkbox" value="Other" id="fundingOtherCb"> Other</label>
+                </div>
+                <div class="form-group" id="fundingOtherGroup" style="display:none;margin-top:0.5rem;">
+                    <input type="text" id="fundingOther" placeholder="Specify other funding source">
                 </div>
             </div>
 
@@ -1176,6 +1215,10 @@
                     <label><input type="checkbox" value="Research/Data Collection"> Research / Data</label>
                     <label><input type="checkbox" value="Community Engagement"> Community Engagement</label>
                     <label><input type="checkbox" value="Technical Support"> Technical Support</label>
+                    <label><input type="checkbox" value="Other" id="activityOtherCb"> Other</label>
+                </div>
+                <div class="form-group" id="activityOtherGroup" style="display:none;margin-top:0.5rem;">
+                    <input type="text" id="activityOther" placeholder="Specify other activity type">
                 </div>
             </div>
 
@@ -1239,21 +1282,26 @@
             <div class="card-desc">Outputs are the direct, countable products of your activities. These are the "how much" and "how many" metrics.</div>
 
             <div class="form-group">
-                <label>What participant groups will you track? (select all that apply)</label>
-                <div class="checkbox-group" id="participantGroups">
-                    <label><input type="checkbox" value="Students"> Students</label>
-                    <label><input type="checkbox" value="Teachers/Educators"> Teachers / Educators</label>
-                    <label><input type="checkbox" value="Administrators"> Administrators</label>
-                    <label><input type="checkbox" value="Parents/Families"> Parents / Families</label>
-                    <label><input type="checkbox" value="Working Professionals"> Working Professionals</label>
-                    <label><input type="checkbox" value="Community Members"> Community Members</label>
-                    <label><input type="checkbox" value="Organizations/Schools"> Organizations / Schools</label>
+                <label>Who do you serve and how many annually?</label>
+                <div class="hint">Enter each participant group and your annual target number.</div>
+                <div class="dynamic-list" id="participantTargets">
+                    <div class="list-item paired-row">
+                        <input type="text" class="pair-group" placeholder="e.g., Students">
+                        <input type="text" class="pair-count" placeholder="e.g., 500">
+                        <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
+                    </div>
+                    <div class="list-item paired-row">
+                        <input type="text" class="pair-group" placeholder="e.g., Teachers">
+                        <input type="text" class="pair-count" placeholder="e.g., 50">
+                        <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
+                    </div>
+                    <div class="list-item paired-row">
+                        <input type="text" class="pair-group" placeholder="e.g., Schools">
+                        <input type="text" class="pair-count" placeholder="e.g., 10">
+                        <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
+                    </div>
                 </div>
-            </div>
-
-            <div class="form-group">
-                <label for="annualParticipants">Approximately how many total participants do you aim to serve annually?</label>
-                <input type="text" id="annualParticipants" placeholder="e.g., 500 students, 50 teachers">
+                <button class="add-btn" onclick="addPairedListItem('participantTargets')">+ Add Participant Group</button>
             </div>
 
             <div class="form-group">
@@ -1354,6 +1402,39 @@
                 </div>
                 <button class="add-btn" onclick="addListItem('medSystemic', 'Describe another systemic change...')">+ Add Outcome</button>
             </div>
+
+            <h3>Quantitative Targets</h3>
+            <div class="hint" style="margin-bottom:0.75rem;">Set specific, measurable targets for your key outcomes. What numbers will demonstrate success?</div>
+
+            <div class="dynamic-list" id="quantTargets">
+                <div class="list-item quant-row">
+                    <input type="text" class="qt-metric" placeholder="Metric (e.g., Student proficiency rate)">
+                    <input type="text" class="qt-baseline" placeholder="Baseline (e.g., 40%)">
+                    <input type="text" class="qt-target" placeholder="Target (e.g., 80%)">
+                    <select class="qt-timeframe">
+                        <option value="">Timeframe</option>
+                        <option>1 Year</option>
+                        <option>2 Years</option>
+                        <option>3 Years</option>
+                        <option>5 Years</option>
+                    </select>
+                    <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
+                </div>
+                <div class="list-item quant-row">
+                    <input type="text" class="qt-metric" placeholder="Metric (e.g., Teacher retention rate)">
+                    <input type="text" class="qt-baseline" placeholder="Baseline">
+                    <input type="text" class="qt-target" placeholder="Target">
+                    <select class="qt-timeframe">
+                        <option value="">Timeframe</option>
+                        <option>1 Year</option>
+                        <option>2 Years</option>
+                        <option>3 Years</option>
+                        <option>5 Years</option>
+                    </select>
+                    <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
+                </div>
+            </div>
+            <button class="add-btn" onclick="addQuantTargetRow()">+ Add Target</button>
         </div>
 
         <div class="nav-buttons">
@@ -1627,6 +1708,54 @@ function addListItem(containerId, placeholder) {
     div.querySelector('input').focus();
 }
 
+function addPairedListItem(containerId) {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'list-item paired-row';
+    div.innerHTML = `<input type="text" class="pair-group" placeholder="e.g., Students">
+        <input type="text" class="pair-count" placeholder="e.g., 500">
+        <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>`;
+    container.appendChild(div);
+    div.querySelector('.pair-group').focus();
+}
+
+function addQuantTargetRow() {
+    const container = document.getElementById('quantTargets');
+    const div = document.createElement('div');
+    div.className = 'list-item quant-row';
+    div.innerHTML = `<input type="text" class="qt-metric" placeholder="Metric name">
+        <input type="text" class="qt-baseline" placeholder="Baseline">
+        <input type="text" class="qt-target" placeholder="Target">
+        <select class="qt-timeframe">
+            <option value="">Timeframe</option>
+            <option>1 Year</option>
+            <option>2 Years</option>
+            <option>3 Years</option>
+            <option>5 Years</option>
+        </select>
+        <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>`;
+    container.appendChild(div);
+    div.querySelector('.qt-metric').focus();
+}
+
+function getPairedListValues(containerId) {
+    const rows = document.querySelectorAll('#' + containerId + ' .paired-row');
+    return Array.from(rows).map(row => ({
+        group: row.querySelector('.pair-group')?.value.trim() || '',
+        target: row.querySelector('.pair-count')?.value.trim() || ''
+    })).filter(r => r.group || r.target);
+}
+
+function getQuantTargetValues() {
+    const rows = document.querySelectorAll('#quantTargets .quant-row');
+    return Array.from(rows).map(row => ({
+        metric: row.querySelector('.qt-metric')?.value.trim() || '',
+        baseline: row.querySelector('.qt-baseline')?.value.trim() || '',
+        target: row.querySelector('.qt-target')?.value.trim() || '',
+        timeframe: row.querySelector('.qt-timeframe')?.value || ''
+    })).filter(r => r.metric);
+}
+
 // ========== CHECKBOX STYLING ==========
 document.addEventListener('change', function(e) {
     if (e.target.type === 'checkbox') {
@@ -1641,6 +1770,16 @@ document.addEventListener('change', function(e) {
 document.getElementById('orgType').addEventListener('change', function() {
     document.getElementById('orgTypeOtherGroup').style.display =
         this.value === 'Other' ? 'block' : 'none';
+});
+
+// ========== CHECKBOX "OTHER" TOGGLE ==========
+document.getElementById('fundingOtherCb').addEventListener('change', function() {
+    document.getElementById('fundingOtherGroup').style.display = this.checked ? 'block' : 'none';
+    if (this.checked) document.getElementById('fundingOther').focus();
+});
+document.getElementById('activityOtherCb').addEventListener('change', function() {
+    document.getElementById('activityOtherGroup').style.display = this.checked ? 'block' : 'none';
+    if (this.checked) document.getElementById('activityOther').focus();
 });
 
 // ========== COLLECT DATA ==========
@@ -1658,6 +1797,13 @@ function collectData() {
 
     // Inputs
     data.funding = getCheckedValues('fundingSources');
+    // Replace "Other" checkbox value with the actual typed text
+    const fundingOtherIdx = data.funding.indexOf('Other');
+    if (fundingOtherIdx !== -1) {
+        const fundingOtherVal = document.getElementById('fundingOther').value.trim();
+        if (fundingOtherVal) { data.funding[fundingOtherIdx] = fundingOtherVal; }
+        else { data.funding.splice(fundingOtherIdx, 1); }
+    }
     data.staffRoles = getListValues('staffRoles');
     data.partnerships = getListValues('partnerships');
     data.techAssets = getListValues('techAssets');
@@ -1665,13 +1811,18 @@ function collectData() {
 
     // Activities
     data.activityTypes = getCheckedValues('activityTypes');
+    const activityOtherIdx = data.activityTypes.indexOf('Other');
+    if (activityOtherIdx !== -1) {
+        const activityOtherVal = document.getElementById('activityOther').value.trim();
+        if (activityOtherVal) { data.activityTypes[activityOtherIdx] = activityOtherVal; }
+        else { data.activityTypes.splice(activityOtherIdx, 1); }
+    }
     data.activityDetails = getListValues('activityDetails');
     data.activityFrequency = document.getElementById('activityFrequency').value;
     data.deliveryMode = document.getElementById('deliveryMode').value;
 
     // Outputs
-    data.participantGroups = getCheckedValues('participantGroups');
-    data.annualParticipants = document.getElementById('annualParticipants').value.trim();
+    data.participantTargets = getPairedListValues('participantTargets');
     data.specificOutputs = getListValues('specificOutputs');
     data.dataCollection = document.getElementById('dataCollection').value.trim();
 
@@ -1681,6 +1832,7 @@ function collectData() {
     data.shortFeedback = document.getElementById('shortFeedback').value.trim();
     data.medBehavior = getListValues('medBehavior');
     data.medSystemic = getListValues('medSystemic');
+    data.quantTargets = getQuantTargetValues();
 
     // Impacts
     data.impactPopulation = getListValues('impactPopulation');
@@ -1732,8 +1884,7 @@ function buildReviewSummary() {
             data.deliveryMode ? `<strong>Mode:</strong> ${data.deliveryMode}` : null,
         ]},
         { title: 'Outputs', items: [
-            data.participantGroups.length ? `<strong>Groups:</strong> ${data.participantGroups.join(', ')}` : null,
-            data.annualParticipants ? `<strong>Annual reach:</strong> ${data.annualParticipants}` : null,
+            (data.participantTargets || []).length ? `<strong>Participants:</strong> ${data.participantTargets.map(p => p.target ? p.group + ' (' + p.target + ')' : p.group).join(', ')}` : null,
             data.specificOutputs.length ? `<strong>Outputs:</strong> ${data.specificOutputs.join('; ')}` : null,
         ]},
         { title: 'Outcomes', items: [
@@ -1741,6 +1892,7 @@ function buildReviewSummary() {
             data.shortBehavior.length ? `<strong>Short-term (behavior):</strong> ${data.shortBehavior.join('; ')}` : null,
             data.medBehavior.length ? `<strong>Medium-term (practice):</strong> ${data.medBehavior.join('; ')}` : null,
             data.medSystemic.length ? `<strong>Medium-term (systemic):</strong> ${data.medSystemic.join('; ')}` : null,
+            data.quantTargets.length ? `<strong>Targets:</strong> ${data.quantTargets.map(t => t.metric + ' (' + t.baseline + ' → ' + t.target + (t.timeframe ? ', ' + t.timeframe : '') + ')').join('; ')}` : null,
         ]},
         { title: 'Impacts', items: [
             data.impactPopulation.length ? `<strong>Population:</strong> ${data.impactPopulation.join('; ')}` : null,
@@ -1814,9 +1966,8 @@ function renderLogicModel(data) {
     ].filter(Boolean);
 
     const outputsList = [
-        ...data.specificOutputs,
-        data.annualParticipants ? `Target: ${data.annualParticipants}` : null,
-        ...data.participantGroups.map(g => `Track: ${g}`)
+        ...(data.participantTargets || []).map(p => p.target ? `${p.group}: ${p.target}` : p.group),
+        ...data.specificOutputs
     ].filter(Boolean);
 
     const shortOutcomes = [
@@ -1958,8 +2109,7 @@ function renderDetailSections(data) {
             icon: '&#x1f4c8;',
             title: 'Outputs',
             content: buildDetailList([
-                { label: 'Participant Groups', items: data.participantGroups },
-                data.annualParticipants ? { label: 'Annual Target', text: data.annualParticipants } : null,
+                (data.participantTargets || []).length ? { label: 'Participant Targets', items: data.participantTargets.map(p => p.target ? `${p.group}: ${p.target}` : p.group) } : null,
                 { label: 'Specific Outputs', items: data.specificOutputs },
                 data.dataCollection ? { label: 'Data Collection Methods', text: data.dataCollection } : null,
             ])
@@ -1979,7 +2129,7 @@ function renderDetailSections(data) {
             content: buildDetailList([
                 { label: 'Sustained Practice Changes', items: data.medBehavior },
                 { label: 'Systemic Changes', items: data.medSystemic },
-            ])
+            ]) + buildQuantTargetsTable(data.quantTargets)
         },
         {
             icon: '&#x1f30d;',
@@ -2015,31 +2165,119 @@ function buildDetailList(groups) {
     }).filter(Boolean).join('') || '<p style="color:#999;font-style:italic;">No data provided for this section.</p>';
 }
 
+function buildQuantTargetsTable(targets) {
+    if (!targets || !targets.length) return '';
+    return `<p style="margin-top:1rem;"><strong>Quantitative Targets:</strong></p>
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:0.3rem;">
+            <tr style="background:var(--primary);color:white;"><th style="padding:0.4rem 0.6rem;text-align:left;">Metric</th><th style="padding:0.4rem 0.6rem;">Baseline</th><th style="padding:0.4rem 0.6rem;">Target</th><th style="padding:0.4rem 0.6rem;">Timeframe</th></tr>
+            ${targets.map(t => `<tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:0.4rem 0.6rem;">${esc(t.metric)}</td>
+                <td style="padding:0.4rem 0.6rem;text-align:center;">${esc(t.baseline)}</td>
+                <td style="padding:0.4rem 0.6rem;text-align:center;">${esc(t.target)}</td>
+                <td style="padding:0.4rem 0.6rem;text-align:center;">${esc(t.timeframe)}</td>
+            </tr>`).join('')}
+        </table>`;
+}
+
 // ========== MEASUREMENT SUGGESTIONS ==========
 function renderMeasurementSuggestions(data) {
     const el = document.getElementById('measurementSuggestions');
-    const suggestions = generateMeasurementSuggestions(data);
+    window.currentMeasurements = generateMeasurementSuggestions(data);
+    renderMeasurementCards(el);
+}
 
+function renderMeasurementCards(el) {
+    const suggestions = window.currentMeasurements;
     el.innerHTML = `
         <h2 style="font-size:1.2rem;margin:2rem 0 0.5rem;color:var(--primary);">Recommended Measurement Framework</h2>
-        <p style="font-size:0.9rem;color:var(--text-light);margin-bottom:1rem;">Based on your logic model, here are suggested approaches for measuring your organization's success at each stage.</p>
-        ${suggestions.map(cat => `
+        <p style="font-size:0.9rem;color:var(--text-light);margin-bottom:1rem;">Based on your logic model, here are suggested approaches for measuring your organization's success at each stage. You can edit, remove, or add your own measures.</p>
+        ${suggestions.map((cat, ci) => `
             <div class="detail-section">
                 <h3 onclick="this.querySelector('.toggle').classList.toggle('open'); this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none';">
                     <span>${cat.icon}</span>
                     <span>${cat.title}</span>
                     <span class="toggle open" style="margin-left:auto;">&#x25B6;</span>
                 </h3>
-                <div class="detail-content">
-                    ${cat.measures.map(m => `<div class="measure-card">
-                        <span class="measure-type ${m.type}">${m.type}</span>
-                        <h4>${m.name}</h4>
-                        <p>${m.description}</p>
-                    </div>`).join('')}
+                <div class="detail-content" id="measCat${ci}">
+                    ${cat.measures.map((m, mi) => renderMeasureCard(ci, mi, m)).join('')}
+                    <button class="add-btn measure-add-btn" onclick="addCustomMeasure(${ci})">+ Add Custom Measure</button>
                 </div>
             </div>
         `).join('')}
     `;
+}
+
+function renderMeasureCard(ci, mi, m) {
+    return `<div class="measure-card" id="mc_${ci}_${mi}">
+        <div class="measure-actions">
+            <button class="measure-edit-btn" onclick="editMeasure(${ci},${mi})" title="Edit">&#x270F;&#xFE0F;</button>
+            <button class="measure-delete-btn" onclick="deleteMeasure(${ci},${mi})" title="Remove">&times;</button>
+        </div>
+        <span class="measure-type ${m.type}">${m.type}</span>
+        <h4>${esc(m.name)}</h4>
+        <p>${esc(m.description)}</p>
+    </div>`;
+}
+
+function editMeasure(ci, mi) {
+    const m = window.currentMeasurements[ci].measures[mi];
+    const card = document.getElementById('mc_' + ci + '_' + mi);
+    if (!card) return;
+    card.innerHTML = `
+        <div class="measure-edit-form">
+            <input type="text" class="me-name" value="${esc(m.name)}" placeholder="Measure name" style="font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;width:100%;padding:0.5rem;">
+            <select class="me-type" style="margin-bottom:0.4rem;padding:0.4rem;border-radius:6px;border:1px solid var(--border);">
+                <option value="quantitative" ${m.type==='quantitative'?'selected':''}>quantitative</option>
+                <option value="qualitative" ${m.type==='qualitative'?'selected':''}>qualitative</option>
+                <option value="mixed" ${m.type==='mixed'?'selected':''}>mixed</option>
+            </select>
+            <textarea class="me-desc" rows="3" style="width:100%;padding:0.5rem;font-size:0.85rem;">${esc(m.description)}</textarea>
+            <div style="display:flex;gap:0.5rem;margin-top:0.4rem;">
+                <button class="btn btn-primary" style="font-size:0.8rem;padding:0.4rem 1rem;" onclick="saveMeasure(${ci},${mi})">Save</button>
+                <button class="btn btn-secondary" style="font-size:0.8rem;padding:0.4rem 1rem;" onclick="cancelEditMeasure(${ci},${mi})">Cancel</button>
+            </div>
+        </div>`;
+}
+
+function saveMeasure(ci, mi) {
+    const card = document.getElementById('mc_' + ci + '_' + mi);
+    if (!card) return;
+    const name = card.querySelector('.me-name').value.trim();
+    const type = card.querySelector('.me-type').value;
+    const desc = card.querySelector('.me-desc').value.trim();
+    if (!name) return;
+    window.currentMeasurements[ci].measures[mi] = { name, type, description: desc };
+    card.outerHTML = renderMeasureCard(ci, mi, window.currentMeasurements[ci].measures[mi]);
+}
+
+function cancelEditMeasure(ci, mi) {
+    const card = document.getElementById('mc_' + ci + '_' + mi);
+    if (!card) return;
+    card.outerHTML = renderMeasureCard(ci, mi, window.currentMeasurements[ci].measures[mi]);
+}
+
+function deleteMeasure(ci, mi) {
+    if (!confirm('Remove this measure?')) return;
+    window.currentMeasurements[ci].measures.splice(mi, 1);
+    // Re-render just this category
+    const catEl = document.getElementById('measCat' + ci);
+    if (catEl) {
+        const cat = window.currentMeasurements[ci];
+        catEl.innerHTML = cat.measures.map((m, i) => renderMeasureCard(ci, i, m)).join('') +
+            `<button class="add-btn measure-add-btn" onclick="addCustomMeasure(${ci})">+ Add Custom Measure</button>`;
+    }
+}
+
+function addCustomMeasure(ci) {
+    const newMeasure = { name: 'New Measure', type: 'mixed', description: 'Describe this measure...' };
+    window.currentMeasurements[ci].measures.push(newMeasure);
+    const mi = window.currentMeasurements[ci].measures.length - 1;
+    const catEl = document.getElementById('measCat' + ci);
+    if (catEl) {
+        const addBtn = catEl.querySelector('.measure-add-btn');
+        addBtn.insertAdjacentHTML('beforebegin', renderMeasureCard(ci, mi, newMeasure));
+        editMeasure(ci, mi);
+    }
 }
 
 function generateMeasurementSuggestions(data) {
@@ -2047,11 +2285,13 @@ function generateMeasurementSuggestions(data) {
 
     // OUTPUT MEASURES
     const outputMeasures = [];
-    if (data.participantGroups.length) {
+    const ptGroups = (data.participantTargets || []).map(p => p.group);
+    const ptSummary = (data.participantTargets || []).map(p => p.target ? `${p.target} ${p.group.toLowerCase()}` : p.group.toLowerCase()).join(', ');
+    if (ptGroups.length) {
         outputMeasures.push({
             name: 'Participant Reach Tracking',
             type: 'quantitative',
-            description: `Track the number of ${data.participantGroups.join(', ').toLowerCase()} served per program cycle. Use registration databases and attendance logs. Compare against your target of ${data.annualParticipants || 'your annual goal'}.`
+            description: `Track the number of ${ptGroups.join(', ').toLowerCase()} served per program cycle. Use registration databases and attendance logs. Compare against your targets: ${ptSummary || 'your annual goal'}.`
         });
     }
     if (data.specificOutputs.length) {
@@ -2099,7 +2339,7 @@ function generateMeasurementSuggestions(data) {
     shortMeasures.push({
         name: 'Focus Groups & Interviews',
         type: 'qualitative',
-        description: `Conduct quarterly focus groups with ${data.participantGroups.slice(0,2).join(' and ').toLowerCase() || 'participants'} to gather rich, contextual feedback on program experience, perceived value, and areas for improvement.`
+        description: `Conduct quarterly focus groups with ${ptGroups.slice(0,2).join(' and ').toLowerCase() || 'participants'} to gather rich, contextual feedback on program experience, perceived value, and areas for improvement.`
     });
     suggestions.push({ icon: '&#x1f31f;', title: 'Short-Term Outcome Measures (1-3 Years)', measures: shortMeasures });
 
@@ -2182,7 +2422,7 @@ function generateMeasurementSuggestions(data) {
             {
                 name: 'Stakeholder Feedback Loops',
                 type: 'mixed',
-                description: `Establish regular feedback mechanisms with ${data.participantGroups.join(', ').toLowerCase() || 'your target audience'}, staff, and partners. Use findings to adapt your logic model as you learn what works.`
+                description: `Establish regular feedback mechanisms with ${ptGroups.join(', ').toLowerCase() || 'your target audience'}, staff, and partners. Use findings to adapt your logic model as you learn what works.`
             }
         ]
     });
@@ -2477,10 +2717,10 @@ Rules for suggestions:
 function getStepFieldMap(stepIndex) {
     const maps = [
         `Step 0 fields: {"orgName":"string","orgType":"one of: Ed-Tech Company, Nonprofit Organization, K-12 School/District, Higher Education Institution, Workforce Development, Government Agency, Social Enterprise, Corporate Training","mission":"string","targetPop":"string","programName":"string"}`,
-        `Step 1 fields: {"funding":"array, values from: Federal/State Grants, Private Foundation Grants, Venture Capital/Investors, Revenue/Sales, Donations, Subscriptions/Licensing, Corporate Sponsorship, In-kind Support","staffRoles":"array of strings","partnerships":"array of strings","techAssets":"array of strings","otherInputs":"string"}`,
-        `Step 2 fields: {"activityTypes":"array, values from: Teaching/Instruction, Coaching/Mentoring, Professional Development/Training, Workshops/Seminars, Assessments/Testing, Curriculum Development, Software/Platform Development, Research/Data Collection, Community Engagement, Technical Support","activityDetails":"array of strings","activityFrequency":"one of: Daily, Weekly, Monthly, Quarterly, Annually, Ongoing/Continuous, Varies by program","deliveryMode":"one of: In-person, Fully online/virtual, Hybrid (in-person + online), Self-paced digital platform, Multiple modes"}`,
-        `Step 3 fields: {"participantGroups":"array, values from: Students, Teachers/Educators, Administrators, Parents/Families, Working Professionals, Community Members, Organizations/Schools","annualParticipants":"string","specificOutputs":"array of strings","dataCollection":"string"}`,
-        `Step 4 fields: {"shortKnowledge":"array of strings","shortBehavior":"array of strings","shortFeedback":"string","medBehavior":"array of strings","medSystemic":"array of strings"}`,
+        `Step 1 fields: {"funding":"array, values from: Federal/State Grants, Private Foundation Grants, Venture Capital/Investors, Revenue/Sales, Donations, Subscriptions/Licensing, Corporate Sponsorship, In-kind Support, Other","staffRoles":"array of strings","partnerships":"array of strings","techAssets":"array of strings","otherInputs":"string"}`,
+        `Step 2 fields: {"activityTypes":"array, values from: Teaching/Instruction, Coaching/Mentoring, Professional Development/Training, Workshops/Seminars, Assessments/Testing, Curriculum Development, Software/Platform Development, Research/Data Collection, Community Engagement, Technical Support, Other","activityDetails":"array of strings","activityFrequency":"one of: Daily, Weekly, Monthly, Quarterly, Annually, Ongoing/Continuous, Varies by program","deliveryMode":"one of: In-person, Fully online/virtual, Hybrid (in-person + online), Self-paced digital platform, Multiple modes"}`,
+        `Step 3 fields: {"participantTargets":"array of objects {group: string, target: string} — each participant group with their annual target number","specificOutputs":"array of strings","dataCollection":"string"}`,
+        `Step 4 fields: {"shortKnowledge":"array of strings","shortBehavior":"array of strings","shortFeedback":"string","medBehavior":"array of strings","medSystemic":"array of strings","quantTargets":"array of objects {metric: string, baseline: string, target: string, timeframe: string}"}`,
         `Step 5 fields: {"impactPopulation":"array of strings","impactSocietal":"array of strings","impactEvidence":"string"}`,
         `Step 6 fields: {"coreProblem":"string","whyApproach":"string","assumptions":"array of strings","externalFactors":"array of strings"}`,
         `Step 7: Review step — no fields to fill. Just review their data and suggest improvements.`
@@ -2549,7 +2789,7 @@ function getStepGreetingPrompt(stepIndex, data) {
         `I just started the Logic Model Generator. ${data.orgName ? 'I\'ve entered my org name as "' + data.orgName + '".' : ''} Walk me through each field on this page one at a time — starting with organization type. Ask me about each field, offer suggestions for what to enter, and help me think through my answers.`,
         `I'm now on the Inputs section. Ask me about the resources my ${data.orgType || 'organization'} needs. For each question, give me some tailored suggestions I can pick from based on what you know about my organization.`,
         `I'm on the Activities section now. Ask me about what activities are most important for a ${data.orgType || 'organization'} serving ${data.targetPop || 'my target audience'}. Provide specific suggestions I can choose from.`,
-        `I'm on Outputs now. Ask me about what specific, countable things my program will produce — like number of participants served, sessions held, or materials created. Provide tailored suggestions.`,
+        `I'm on Outputs now. First, help me identify the participant groups I serve and set annual target numbers for each. Then ask about other specific, countable outputs — like sessions held or materials created. Provide tailored suggestions.`,
         `I'm on the Outcomes section. This covers both short-term (1-3 years) and medium-term (3-5 years). Ask me about what changes I expect to see from my work with ${data.targetPop || 'my audience'}. Suggest specific outcomes I might want to track.`,
         `I'm on the Impacts section — the long-term vision (5+ years). Help me think big but realistic about what lasting change my organization can achieve. Suggest specific impact statements.`,
         `I'm on Theory of Change now. Help me articulate WHY my approach will work and what assumptions I'm making. My activities include: ${(data.activityTypes || []).join(', ') || 'not yet specified'}. Suggest key assumptions and external factors.`,
@@ -2650,11 +2890,12 @@ function finalizeMessage(msgEl, fullText) {
                 techAssets: 'Technology & Assets', otherInputs: 'Other Resources',
                 activityTypes: 'Activity Types', activityDetails: 'Activities',
                 activityFrequency: 'Frequency', deliveryMode: 'Delivery Mode',
-                participantGroups: 'Participant Groups', annualParticipants: 'Annual Participants',
+                participantTargets: 'Participant Targets',
                 specificOutputs: 'Outputs', dataCollection: 'Data Collection',
                 shortKnowledge: 'Knowledge Outcomes', shortBehavior: 'Behavioral Outcomes',
                 shortFeedback: 'Feedback Metrics', medBehavior: 'Medium-term Practices',
-                medSystemic: 'Systemic Changes', impactPopulation: 'Population Impact',
+                medSystemic: 'Systemic Changes', quantTargets: 'Quantitative Targets',
+                impactPopulation: 'Population Impact',
                 impactSocietal: 'Societal Impact', impactEvidence: 'Evidence of Success',
                 coreProblem: 'Core Problem', whyApproach: 'Why This Works',
                 assumptions: 'Assumptions', externalFactors: 'External Factors'
@@ -2721,7 +2962,7 @@ function applyFieldValue(field, value) {
 
     // Text inputs and textareas
     const textFields = ['orgName','mission','targetPop','programName','otherInputs',
-        'annualParticipants','dataCollection','shortFeedback','impactEvidence',
+        'dataCollection','shortFeedback','impactEvidence',
         'coreProblem','whyApproach'];
     if (textFields.includes(field)) {
         const el = document.getElementById(field);
@@ -2746,24 +2987,72 @@ function applyFieldValue(field, value) {
         return;
     }
 
-    // Checkbox groups
+    // Checkbox groups (with "Other" support)
     const checkboxMap = {
         'funding': 'fundingSources',
-        'activityTypes': 'activityTypes',
-        'participantGroups': 'participantGroups'
+        'activityTypes': 'activityTypes'
     };
+    const otherMap = { funding: { cbId: 'fundingOtherCb', groupId: 'fundingOtherGroup', inputId: 'fundingOther' },
+                       activityTypes: { cbId: 'activityOtherCb', groupId: 'activityOtherGroup', inputId: 'activityOther' } };
     if (checkboxMap[field] && Array.isArray(value)) {
         const container = document.getElementById(checkboxMap[field]);
         if (container) {
-            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                const shouldCheck = value.some(v =>
-                    cb.value.toLowerCase().includes(v.toLowerCase()) ||
-                    v.toLowerCase().includes(cb.value.toLowerCase())
-                );
-                if (shouldCheck && !cb.checked) {
-                    cb.checked = true;
-                    cb.closest('label')?.classList.add('checked');
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]:not([value="Other"])');
+            value.forEach(v => {
+                let matched = false;
+                checkboxes.forEach(cb => {
+                    if (cb.value.toLowerCase().includes(v.toLowerCase()) ||
+                        v.toLowerCase().includes(cb.value.toLowerCase())) {
+                        if (!cb.checked) { cb.checked = true; cb.closest('label')?.classList.add('checked'); }
+                        matched = true;
+                    }
+                });
+                if (!matched && otherMap[field]) {
+                    const otherCb = document.getElementById(otherMap[field].cbId);
+                    if (otherCb && !otherCb.checked) { otherCb.checked = true; otherCb.closest('label')?.classList.add('checked'); }
+                    document.getElementById(otherMap[field].groupId).style.display = 'block';
+                    document.getElementById(otherMap[field].inputId).value = v;
+                }
+            });
+        }
+        return;
+    }
+
+    // Paired list fields (participant targets)
+    if (field === 'participantTargets' && Array.isArray(value)) {
+        const container = document.getElementById('participantTargets');
+        if (container) {
+            value.forEach((item, i) => {
+                const rows = container.querySelectorAll('.paired-row');
+                let row;
+                // Find an empty row or create a new one
+                const emptyRow = Array.from(rows).find(r => !r.querySelector('.pair-group').value.trim());
+                if (emptyRow) { row = emptyRow; }
+                else { addPairedListItem('participantTargets'); row = container.querySelectorAll('.paired-row')[container.querySelectorAll('.paired-row').length - 1]; }
+                if (row) {
+                    row.querySelector('.pair-group').value = capitalizeFirst(item.group || '');
+                    row.querySelector('.pair-count').value = item.target || '';
+                }
+            });
+        }
+        return;
+    }
+
+    // Quantitative target fields
+    if (field === 'quantTargets' && Array.isArray(value)) {
+        const container = document.getElementById('quantTargets');
+        if (container) {
+            value.forEach(item => {
+                const rows = container.querySelectorAll('.quant-row');
+                const emptyRow = Array.from(rows).find(r => !r.querySelector('.qt-metric').value.trim());
+                let row;
+                if (emptyRow) { row = emptyRow; }
+                else { addQuantTargetRow(); row = container.querySelectorAll('.quant-row')[container.querySelectorAll('.quant-row').length - 1]; }
+                if (row) {
+                    row.querySelector('.qt-metric').value = capitalizeFirst(item.metric || '');
+                    row.querySelector('.qt-baseline').value = item.baseline || '';
+                    row.querySelector('.qt-target').value = item.target || '';
+                    if (item.timeframe) row.querySelector('.qt-timeframe').value = item.timeframe;
                 }
             });
         }
@@ -2812,7 +3101,7 @@ function applySuggestionChip(field, value) {
 
     // For text fields — only set if empty, otherwise append
     const textFields = ['orgName','mission','targetPop','programName','otherInputs',
-        'annualParticipants','dataCollection','shortFeedback','impactEvidence',
+        'dataCollection','shortFeedback','impactEvidence',
         'coreProblem','whyApproach'];
     if (textFields.includes(field)) {
         const el = document.getElementById(field);
@@ -2846,29 +3135,46 @@ function applySuggestionChip(field, value) {
         return;
     }
 
-    // For checkbox groups
-    const checkboxMap = {
-        'funding': 'fundingSources',
-        'activityTypes': 'activityTypes',
-        'participantGroups': 'participantGroups'
-    };
-    if (checkboxMap[field]) {
-        const container = document.getElementById(checkboxMap[field]);
+    // For checkbox groups (with "Other" support)
+    const cbMap = { 'funding': 'fundingSources', 'activityTypes': 'activityTypes' };
+    const otherCbMap = { funding: { cbId: 'fundingOtherCb', groupId: 'fundingOtherGroup', inputId: 'fundingOther' },
+                         activityTypes: { cbId: 'activityOtherCb', groupId: 'activityOtherGroup', inputId: 'activityOther' } };
+    if (cbMap[field]) {
+        const container = document.getElementById(cbMap[field]);
         if (container) {
-            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => {
+            let matched = false;
+            container.querySelectorAll('input[type="checkbox"]:not([value="Other"])').forEach(cb => {
                 if (cb.value.toLowerCase().includes(value.toLowerCase()) ||
                     value.toLowerCase().includes(cb.value.toLowerCase())) {
-                    if (!cb.checked) {
-                        cb.checked = true;
-                        cb.closest('label')?.classList.add('checked');
-                    }
+                    if (!cb.checked) { cb.checked = true; cb.closest('label')?.classList.add('checked'); }
+                    matched = true;
                 }
             });
+            if (!matched && otherCbMap[field]) {
+                const otherCb = document.getElementById(otherCbMap[field].cbId);
+                if (otherCb && !otherCb.checked) { otherCb.checked = true; otherCb.closest('label')?.classList.add('checked'); }
+                document.getElementById(otherCbMap[field].groupId).style.display = 'block';
+                document.getElementById(otherCbMap[field].inputId).value = value;
+            }
         }
         saveFormData();
         showAutosaveIndicator('Added!');
         return;
+    }
+
+    // For participant targets — add group as a new paired row
+    if (field === 'participantTargets') {
+        const container = document.getElementById('participantTargets');
+        if (container) {
+            const existing = Array.from(container.querySelectorAll('.pair-group'));
+            if (existing.some(inp => inp.value.trim().toLowerCase() === value.toLowerCase())) {
+                showAutosaveIndicator('Already added'); return;
+            }
+            const emptyRow = Array.from(container.querySelectorAll('.paired-row')).find(r => !r.querySelector('.pair-group').value.trim());
+            if (emptyRow) { emptyRow.querySelector('.pair-group').value = value; }
+            else { addPairedListItem('participantTargets'); container.querySelectorAll('.paired-row:last-child .pair-group')[0].value = value; }
+        }
+        saveFormData(); showAutosaveIndicator('Added!'); return;
     }
 
     // For dynamic list fields — add as a new item
@@ -3070,7 +3376,7 @@ function restoreFormData() {
         const textMap = {
             orgName:'orgName', mission:'mission', targetPop:'targetPop',
             programName:'programName', otherInputs:'otherInputs',
-            annualParticipants:'annualParticipants', dataCollection:'dataCollection',
+            dataCollection:'dataCollection',
             shortFeedback:'shortFeedback', impactEvidence:'impactEvidence',
             coreProblem:'coreProblem', whyApproach:'whyApproach'
         };
@@ -3088,16 +3394,29 @@ function restoreFormData() {
             }
         });
 
-        // Restore checkboxes
-        const cbMap = { funding:'fundingSources', activityTypes:'activityTypes', participantGroups:'participantGroups' };
+        // Restore checkboxes (with "Other" support for funding & activityTypes)
+        const cbMap = { funding:'fundingSources', activityTypes:'activityTypes' };
+        const otherTextMap = { funding: { cbId: 'fundingOtherCb', groupId: 'fundingOtherGroup', inputId: 'fundingOther' },
+                               activityTypes: { cbId: 'activityOtherCb', groupId: 'activityOtherGroup', inputId: 'activityOther' } };
         Object.entries(cbMap).forEach(([key, containerId]) => {
             if (data[key] && data[key].length) {
                 const container = document.getElementById(containerId);
                 if (container) {
-                    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                        if (data[key].includes(cb.value)) {
+                    const allCbValues = Array.from(container.querySelectorAll('input[type="checkbox"]')).map(cb => cb.value);
+                    data[key].forEach(val => {
+                        const cb = container.querySelector(`input[type="checkbox"][value="${val}"]`);
+                        if (cb) {
                             cb.checked = true;
                             cb.closest('label')?.classList.add('checked');
+                        } else if (otherTextMap[key]) {
+                            // Value doesn't match any checkbox — it's an "Other" value
+                            const otherCb = document.getElementById(otherTextMap[key].cbId);
+                            if (otherCb) {
+                                otherCb.checked = true;
+                                otherCb.closest('label')?.classList.add('checked');
+                                document.getElementById(otherTextMap[key].groupId).style.display = 'block';
+                                document.getElementById(otherTextMap[key].inputId).value = val;
+                            }
                         }
                     });
                 }
@@ -3130,6 +3449,50 @@ function restoreFormData() {
                 }
             }
         });
+
+        // Restore participant targets (paired rows)
+        if (data.participantTargets && data.participantTargets.length) {
+            const container = document.getElementById('participantTargets');
+            if (container) {
+                const rows = container.querySelectorAll('.paired-row');
+                data.participantTargets.forEach((p, i) => {
+                    let row;
+                    if (i < rows.length) {
+                        row = rows[i];
+                    } else {
+                        addPairedListItem('participantTargets');
+                        row = container.querySelectorAll('.paired-row')[container.querySelectorAll('.paired-row').length - 1];
+                    }
+                    if (row) {
+                        row.querySelector('.pair-group').value = p.group || '';
+                        row.querySelector('.pair-count').value = p.target || '';
+                    }
+                });
+            }
+        }
+
+        // Restore quantitative targets
+        if (data.quantTargets && data.quantTargets.length) {
+            const container = document.getElementById('quantTargets');
+            if (container) {
+                const rows = container.querySelectorAll('.quant-row');
+                data.quantTargets.forEach((t, i) => {
+                    let row;
+                    if (i < rows.length) {
+                        row = rows[i];
+                    } else {
+                        addQuantTargetRow();
+                        row = container.querySelectorAll('.quant-row')[container.querySelectorAll('.quant-row').length - 1];
+                    }
+                    if (row) {
+                        row.querySelector('.qt-metric').value = t.metric || '';
+                        row.querySelector('.qt-baseline').value = t.baseline || '';
+                        row.querySelector('.qt-target').value = t.target || '';
+                        if (t.timeframe) row.querySelector('.qt-timeframe').value = t.timeframe;
+                    }
+                });
+            }
+        }
 
         return true;
     } catch(e) { console.warn('Restore failed:', e); return false; }
