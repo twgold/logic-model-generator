@@ -6,18 +6,18 @@
     <title>Logic Model Generator</title>
     <style>
         :root {
-            --primary: #1a5276;
-            --primary-light: #2980b9;
-            --accent: #e67e22;
-            --accent-light: #f39c12;
+            --primary: #1E2A42;
+            --primary-light: #2C3E5A;
+            --accent: #D4644A;
+            --accent-light: #E07A63;
             --success: #27ae60;
-            --bg: #f0f4f8;
+            --bg: #F2F0EC;
             --card: #ffffff;
-            --text: #2c3e50;
-            --text-light: #7f8c8d;
-            --border: #dce1e6;
-            --input-bg: #f8fafc;
-            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --text: #1E2A42;
+            --text-light: #6B7A8D;
+            --border: #d8d5cf;
+            --input-bg: #faf9f7;
+            --shadow: 0 2px 12px rgba(30,42,66,0.08);
             --radius: 12px;
             --ai-purple: #7c3aed;
             --ai-purple-light: #a78bfa;
@@ -37,13 +37,17 @@
 
         /* HEADER */
         .header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            background: var(--primary);
             color: white;
-            padding: 2rem 2rem 1.5rem;
+            padding: 1.2rem 2rem 1rem;
             text-align: center;
         }
-        .header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
-        .header p { opacity: 0.85; font-size: 0.95rem; }
+        .header-logo {
+            height: 36px;
+            margin-bottom: 0.6rem;
+        }
+        .header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.2rem; }
+        .header p { opacity: 0.75; font-size: 0.88rem; }
 
         /* PROGRESS */
         .progress-container {
@@ -103,7 +107,7 @@
         .step-dot.active .dot {
             border-color: var(--accent);
             color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.15);
+            box-shadow: 0 0 0 4px rgba(212, 100, 74, 0.15);
         }
         .step-dot.completed .dot {
             background: var(--success);
@@ -188,7 +192,7 @@
         .form-group select:focus {
             outline: none;
             border-color: var(--primary-light);
-            box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+            box-shadow: 0 0 0 3px rgba(30, 42, 66, 0.1);
         }
         .form-group textarea { resize: vertical; min-height: 80px; }
 
@@ -210,7 +214,7 @@
         .checkbox-group label:hover { border-color: var(--primary-light); }
         .checkbox-group label.checked {
             border-color: var(--primary-light);
-            background: rgba(41, 128, 185, 0.08);
+            background: rgba(30, 42, 66, 0.06);
         }
         .checkbox-group input[type="checkbox"] { accent-color: var(--primary-light); }
 
@@ -274,7 +278,7 @@
             background: var(--accent);
             color: white;
         }
-        .btn-primary:hover { background: #d35400; }
+        .btn-primary:hover { background: #B8533D; }
         .btn-secondary {
             background: white;
             color: var(--text);
@@ -282,7 +286,7 @@
         }
         .btn-secondary:hover { border-color: var(--primary-light); color: var(--primary-light); }
         .btn-generate {
-            background: linear-gradient(135deg, var(--success) 0%, #2ecc71 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             color: white;
             padding: 1rem 2.5rem;
             font-size: 1.05rem;
@@ -374,15 +378,15 @@
             padding: 0 0.3rem 0.5rem;
         }
         .lm-col:nth-child(1) .lm-col-header,
-        .lm-col:nth-child(1) .lm-col-question { background: #1a5276; }
+        .lm-col:nth-child(1) .lm-col-question { background: #1E2A42; }
         .lm-col:nth-child(2) .lm-col-header,
-        .lm-col:nth-child(2) .lm-col-question { background: #2471a3; }
+        .lm-col:nth-child(2) .lm-col-question { background: #2C3E5A; }
         .lm-col:nth-child(3) .lm-col-header,
-        .lm-col:nth-child(3) .lm-col-question { background: #2e86c1; }
+        .lm-col:nth-child(3) .lm-col-question { background: #3A5070; }
         .lm-col:nth-child(4) .lm-col-header,
-        .lm-col:nth-child(4) .lm-col-question { background: #e67e22; }
+        .lm-col:nth-child(4) .lm-col-question { background: #D4644A; }
         .lm-col:nth-child(5) .lm-col-header,
-        .lm-col:nth-child(5) .lm-col-question { background: #d35400; }
+        .lm-col:nth-child(5) .lm-col-question { background: #B8533D; }
         .lm-col:nth-child(6) .lm-col-header,
         .lm-col:nth-child(6) .lm-col-question { background: #27ae60; }
         .lm-col-body {
@@ -411,8 +415,8 @@
 
         /* THEORY OF CHANGE */
         .toc-box {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e8f4f8 100%);
-            border-left: 4px solid var(--primary);
+            background: linear-gradient(135deg, #faf9f7 0%, #f2f0ec 100%);
+            border-left: 4px solid var(--accent);
             padding: 1.5rem;
             border-radius: 0 8px 8px 0;
             margin: 1.5rem 0;
@@ -525,15 +529,15 @@
                 padding: 2in 1in;
             }
             .print-title-page .print-title-bar {
-                width: 80px; height: 4px; background: #1a5276;
+                width: 80px; height: 4px; background: #1E2A42;
                 margin: 0 auto 1.5rem;
             }
             .print-title-page h1 {
-                font-size: 28pt; color: #1a5276; margin: 0 0 0.5rem;
+                font-size: 28pt; color: #1E2A42; margin: 0 0 0.5rem;
                 font-weight: 800; line-height: 1.2;
             }
             .print-title-page .print-program {
-                font-size: 16pt; color: #e67e22; font-weight: 600; margin: 0.5rem 0 1.5rem;
+                font-size: 16pt; color: #D4644A; font-weight: 600; margin: 0.5rem 0 1.5rem;
             }
             .print-title-page .print-meta {
                 font-size: 11pt; color: #555; line-height: 1.8;
@@ -541,7 +545,7 @@
             .print-title-page .print-mission {
                 font-size: 11pt; color: #444; font-style: italic;
                 max-width: 500px; line-height: 1.6; margin-top: 2rem;
-                padding: 1rem 1.5rem; border-left: 3px solid #e67e22;
+                padding: 1rem 1.5rem; border-left: 3px solid #D4644A;
                 text-align: left;
             }
             .print-title-page .print-date {
@@ -553,24 +557,24 @@
                 box-shadow: none !important; border: none; padding: 0.5rem 0;
                 page-break-inside: avoid;
             }
-            .lm-title { font-size: 14pt !important; color: #1a5276 !important; }
+            .lm-title { font-size: 14pt !important; color: #1E2A42 !important; }
             .lm-subtitle { font-size: 9pt !important; }
-            .lm-grid { border: 2px solid #1a5276 !important; page-break-inside: avoid; }
+            .lm-grid { border: 2px solid #1E2A42 !important; page-break-inside: avoid; }
             .lm-col { border-right: 1px solid #ccc !important; }
             .lm-col-header {
                 color: white !important; font-size: 7pt !important;
                 padding: 0.4rem 0.3rem !important;
             }
             .lm-col:nth-child(1) .lm-col-header,
-            .lm-col:nth-child(1) .lm-col-question { background: #1a5276 !important; }
+            .lm-col:nth-child(1) .lm-col-question { background: #1E2A42 !important; }
             .lm-col:nth-child(2) .lm-col-header,
-            .lm-col:nth-child(2) .lm-col-question { background: #2471a3 !important; }
+            .lm-col:nth-child(2) .lm-col-question { background: #2C3E5A !important; }
             .lm-col:nth-child(3) .lm-col-header,
-            .lm-col:nth-child(3) .lm-col-question { background: #2e86c1 !important; }
+            .lm-col:nth-child(3) .lm-col-question { background: #3A5070 !important; }
             .lm-col:nth-child(4) .lm-col-header,
-            .lm-col:nth-child(4) .lm-col-question { background: #e67e22 !important; }
+            .lm-col:nth-child(4) .lm-col-question { background: #D4644A !important; }
             .lm-col:nth-child(5) .lm-col-header,
-            .lm-col:nth-child(5) .lm-col-question { background: #d35400 !important; }
+            .lm-col:nth-child(5) .lm-col-question { background: #B8533D !important; }
             .lm-col:nth-child(6) .lm-col-header,
             .lm-col:nth-child(6) .lm-col-question { background: #27ae60 !important; }
             .lm-col-question { color: rgba(255,255,255,0.85) !important; }
@@ -579,11 +583,11 @@
             /* Theory of Change */
             .toc-box {
                 page-break-inside: avoid; margin: 1rem 0;
-                border-left: 4px solid #1a5276 !important;
+                border-left: 4px solid #1E2A42 !important;
                 background: #f8f9fa !important;
                 padding: 1rem 1.2rem !important;
             }
-            .toc-box h3 { color: #1a5276 !important; font-size: 12pt !important; }
+            .toc-box h3 { color: #1E2A42 !important; font-size: 12pt !important; }
             .toc-box p { font-size: 9.5pt !important; line-height: 1.6 !important; }
 
             /* Detail sections - SHOW in print */
@@ -597,7 +601,7 @@
                 page-break-inside: avoid;
             }
             .detail-section h3 {
-                font-size: 10.5pt !important; color: #1a5276 !important;
+                font-size: 10.5pt !important; color: #1E2A42 !important;
                 border-bottom: 1px solid #e0e0e0; padding-bottom: 0.3rem;
                 margin-bottom: 0.4rem !important;
             }
@@ -616,7 +620,7 @@
                 padding: 0.5rem 0.75rem !important;
                 margin-bottom: 0.4rem !important;
             }
-            .measure-card h4 { font-size: 9.5pt !important; color: #1a5276 !important; }
+            .measure-card h4 { font-size: 9.5pt !important; color: #1E2A42 !important; }
             .measure-card p { font-size: 8.5pt !important; }
             .measure-type { font-size: 6.5pt !important; }
             .measure-type.quantitative { background: #e8f8f5 !important; color: #1abc9c !important; }
@@ -625,8 +629,8 @@
 
             /* Section headers in print */
             #detailSections > h2, #measurementSuggestions > h2 {
-                font-size: 13pt !important; color: #1a5276 !important;
-                border-bottom: 2px solid #1a5276; padding-bottom: 0.3rem;
+                font-size: 13pt !important; color: #1E2A42 !important;
+                border-bottom: 2px solid #1E2A42; padding-bottom: 0.3rem;
                 page-break-after: avoid;
             }
 
@@ -943,6 +947,7 @@
 </div>
 
 <div class="header">
+    <img src="logo-dark.png" alt="Assessment Solutions LLC" class="header-logo">
     <h1>Logic Model & Theory of Change Generator</h1>
     <p>An interactive tool for organizations and ed-tech companies to map their path to impact</p>
     <div class="ai-status-badge" id="aiHeaderBadge" style="display:none;">
@@ -1075,7 +1080,7 @@
     <div class="section-page" id="step-1">
         <div class="card fade-in">
             <div class="card-header">
-                <div class="card-icon" style="background:#fdebd0;color:#e67e22;">&#x1f4b0;</div>
+                <div class="card-icon" style="background:#fdebd0;color:#D4644A;">&#x1f4b0;</div>
                 <h2>Inputs &mdash; What Do You Need?</h2>
             </div>
             <div class="card-desc">Inputs are the resources that flow into your organization or program. Think about what you need to make your work possible.</div>
@@ -1228,7 +1233,7 @@
     <div class="section-page" id="step-3">
         <div class="card fade-in">
             <div class="card-header">
-                <div class="card-icon" style="background:#d6eaf8;color:#2980b9;">&#x1f4c8;</div>
+                <div class="card-icon" style="background:#e8edf3;color:#2C3E5A;">&#x1f4c8;</div>
                 <h2>Outputs &mdash; What Will You Measure?</h2>
             </div>
             <div class="card-desc">Outputs are the direct, countable products of your activities. These are the "how much" and "how many" metrics.</div>
@@ -1284,7 +1289,7 @@
     <div class="section-page" id="step-4">
         <div class="card fade-in">
             <div class="card-header">
-                <div class="card-icon" style="background:#fdebd0;color:#e67e22;">&#x1f31f;</div>
+                <div class="card-icon" style="background:#fdebd0;color:#D4644A;">&#x1f31f;</div>
                 <h2>Outcomes &mdash; What Changes Do You Expect?</h2>
             </div>
             <div class="card-desc">Outcomes are the changes that happen as a result of your work. Think about short-term and medium-term changes.</div>
@@ -1402,7 +1407,7 @@
     <div class="section-page" id="step-6">
         <div class="card fade-in">
             <div class="card-header">
-                <div class="card-icon" style="background:#f4ecf7;color:#8e44ad;">&#x1f4a1;</div>
+                <div class="card-icon" style="background:#fce8e4;color:#D4644A;">&#x1f4a1;</div>
                 <h2>Theory of Change &mdash; Why Will This Work?</h2>
             </div>
             <div class="card-desc">Your theory of change explains the causal logic behind your work: why you believe your activities will lead to your intended outcomes and impacts.</div>
@@ -1512,6 +1517,7 @@
 <div class="results-container" id="resultsContainer">
     <!-- PRINT TITLE PAGE (hidden on screen, shown in print) -->
     <div class="print-title-page" id="printTitlePage">
+        <img src="logo.png" alt="Assessment Solutions LLC" style="height:44px;margin-bottom:1.5rem;">
         <div class="print-title-bar"></div>
         <h1 id="printOrgTitle"></h1>
         <div class="print-program" id="printProgramName"></div>
