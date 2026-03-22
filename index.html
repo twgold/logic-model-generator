@@ -257,6 +257,85 @@
             font-size: 0.9rem; font-family: inherit; color: var(--text);
         }
 
+        /* LOGIC CHAIN CARDS */
+        .logic-chain-card {
+            background: var(--input-bg);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+        .logic-chain-card:focus-within {
+            border-color: var(--primary-light);
+        }
+        .chain-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        .chain-number {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--primary);
+            background: rgba(30,42,66,0.08);
+            padding: 0.2rem 0.75rem;
+            border-radius: 12px;
+        }
+        .chain-flow {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+            gap: 0.5rem;
+            align-items: start;
+        }
+        .chain-field label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+        .chain-field .hint {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-bottom: 0.3rem;
+        }
+        .chain-field input,
+        .chain-field select {
+            width: 100%;
+            padding: 0.5rem 0.6rem;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-family: inherit;
+            background: white;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+            box-sizing: border-box;
+        }
+        .chain-field input:focus,
+        .chain-field select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+        }
+        .chain-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: var(--accent);
+            font-weight: 700;
+            padding-top: 2rem;
+        }
+        .chain-global-settings {
+            padding: 1rem;
+            background: var(--input-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
         .add-btn {
             display: inline-flex;
             align-items: center;
@@ -362,21 +441,28 @@
             color: var(--text-light);
             margin-bottom: 1.5rem;
         }
-        .lm-grid {
+        /* CONNECTED LOGIC MODEL OUTPUT */
+        .lm-connected-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: 1fr 4fr 1fr;
             gap: 0;
             border: 2px solid var(--primary);
             border-radius: 8px;
             overflow: hidden;
         }
-        .lm-col {
-            border-right: 1px solid var(--border);
-            min-height: 200px;
+        .lm-bookend {
             display: flex;
             flex-direction: column;
         }
-        .lm-col:last-child { border-right: none; }
+        .lm-chain-area {
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+        .lm-chain-headers {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+        }
         .lm-col-header {
             padding: 0.7rem 0.5rem;
             text-align: center;
@@ -393,18 +479,43 @@
             font-style: italic;
             padding: 0 0.3rem 0.5rem;
         }
-        .lm-col:nth-child(1) .lm-col-header,
-        .lm-col:nth-child(1) .lm-col-question { background: #1E2A42; }
-        .lm-col:nth-child(2) .lm-col-header,
-        .lm-col:nth-child(2) .lm-col-question { background: #2C3E5A; }
-        .lm-col:nth-child(3) .lm-col-header,
-        .lm-col:nth-child(3) .lm-col-question { background: #3A5070; }
-        .lm-col:nth-child(4) .lm-col-header,
-        .lm-col:nth-child(4) .lm-col-question { background: #D4644A; }
-        .lm-col:nth-child(5) .lm-col-header,
-        .lm-col:nth-child(5) .lm-col-question { background: #B8533D; }
-        .lm-col:nth-child(6) .lm-col-header,
-        .lm-col:nth-child(6) .lm-col-question { background: #27ae60; }
+        .lm-chain-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            border-top: 1px solid #e8e6e2;
+        }
+        .lm-chain-cell {
+            padding: 0.5rem 0.6rem;
+            font-size: 0.72rem;
+            line-height: 1.35;
+            border-right: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .lm-chain-cell:last-child {
+            border-right: none;
+        }
+        .lm-chain-cell:not(:last-child)::after {
+            content: '\2192';
+            position: absolute;
+            right: -0.55rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 700;
+            z-index: 1;
+            background: white;
+            padding: 0 0.05rem;
+        }
+        .lm-chain-row:nth-child(even) .lm-chain-cell {
+            background: #faf9f7;
+        }
+        .lm-chain-row:nth-child(even) .lm-chain-cell:not(:last-child)::after {
+            background: #faf9f7;
+        }
         .lm-col-body {
             padding: 0.6rem;
             flex: 1;
@@ -420,14 +531,6 @@
             line-height: 1.35;
         }
         .lm-col-body li:last-child { border-bottom: none; }
-        .lm-arrow {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: var(--primary-light);
-            padding: 0 0.2rem;
-        }
 
         /* THEORY OF CHANGE */
         .toc-box {
@@ -593,26 +696,16 @@
             }
             .lm-title { font-size: 14pt !important; color: #1E2A42 !important; }
             .lm-subtitle { font-size: 9pt !important; }
-            .lm-grid { border: 2px solid #1E2A42 !important; page-break-inside: avoid; }
-            .lm-col { border-right: 1px solid #ccc !important; }
+            .lm-connected-grid { border: 2px solid #1E2A42 !important; page-break-inside: avoid; }
+            .lm-chain-area { border-left: 1px solid #ccc !important; border-right: 1px solid #ccc !important; }
             .lm-col-header {
                 color: white !important; font-size: 7pt !important;
                 padding: 0.4rem 0.3rem !important;
             }
-            .lm-col:nth-child(1) .lm-col-header,
-            .lm-col:nth-child(1) .lm-col-question { background: #1E2A42 !important; }
-            .lm-col:nth-child(2) .lm-col-header,
-            .lm-col:nth-child(2) .lm-col-question { background: #2C3E5A !important; }
-            .lm-col:nth-child(3) .lm-col-header,
-            .lm-col:nth-child(3) .lm-col-question { background: #3A5070 !important; }
-            .lm-col:nth-child(4) .lm-col-header,
-            .lm-col:nth-child(4) .lm-col-question { background: #D4644A !important; }
-            .lm-col:nth-child(5) .lm-col-header,
-            .lm-col:nth-child(5) .lm-col-question { background: #B8533D !important; }
-            .lm-col:nth-child(6) .lm-col-header,
-            .lm-col:nth-child(6) .lm-col-question { background: #27ae60 !important; }
             .lm-col-question { color: rgba(255,255,255,0.85) !important; }
             .lm-col-body li { font-size: 7pt !important; }
+            .lm-chain-cell { font-size: 7pt !important; }
+            .lm-chain-cell:not(:last-child)::after { color: #D4644A !important; font-size: 7pt !important; }
 
             /* Theory of Change */
             .toc-box {
@@ -696,18 +789,23 @@
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
-            .lm-grid {
-                grid-template-columns: repeat(3, 1fr);
+            .lm-connected-grid {
+                grid-template-columns: 1fr;
+            }
+            .lm-chain-area { border-left: none; border-right: none; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+            .chain-flow {
+                grid-template-columns: 1fr;
+                gap: 0.3rem;
+            }
+            .chain-arrow {
+                padding-top: 0;
+                transform: rotate(90deg);
+                font-size: 1.2rem;
             }
             .progress-steps { gap: 0.25rem; }
             .step-dot .step-label { font-size: 0.55rem; max-width: 50px; }
             .header h1 { font-size: 1.4rem; }
             .card { padding: 1.5rem; }
-        }
-        @media (max-width: 480px) {
-            .lm-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
 
         /* ANIMATION */
@@ -1005,26 +1103,18 @@
         </div>
         <div class="step-dot" data-step="2" onclick="goToStep(2)">
             <div class="dot">3</div>
-            <div class="step-label">Activities</div>
+            <div class="step-label">Chains</div>
         </div>
         <div class="step-dot" data-step="3" onclick="goToStep(3)">
             <div class="dot">4</div>
-            <div class="step-label">Outputs</div>
+            <div class="step-label">Impacts</div>
         </div>
         <div class="step-dot" data-step="4" onclick="goToStep(4)">
             <div class="dot">5</div>
-            <div class="step-label">Outcomes</div>
+            <div class="step-label">Theory</div>
         </div>
         <div class="step-dot" data-step="5" onclick="goToStep(5)">
             <div class="dot">6</div>
-            <div class="step-label">Impacts</div>
-        </div>
-        <div class="step-dot" data-step="6" onclick="goToStep(6)">
-            <div class="dot">7</div>
-            <div class="step-label">Theory</div>
-        </div>
-        <div class="step-dot" data-step="7" onclick="goToStep(7)">
-            <div class="dot">8</div>
             <div class="step-label">Review</div>
         </div>
     </div>
@@ -1189,221 +1279,84 @@
 
         <div class="nav-buttons">
             <button class="btn btn-secondary" onclick="prevStep()">&#x2190; Back</button>
-            <button class="btn btn-primary" onclick="nextStep()">Activities &#x2192;</button>
+            <button class="btn btn-primary" onclick="nextStep()">Logic Chains &#x2192;</button>
         </div>
     </div>
 
-    <!-- STEP 2: ACTIVITIES -->
+    <!-- STEP 2: LOGIC CHAINS -->
     <div class="section-page" id="step-2">
         <div class="card fade-in">
             <div class="card-header">
-                <div class="card-icon" style="background:#d5f5e3;color:#27ae60;">&#x2699;&#xFE0F;</div>
-                <h2>Activities &mdash; What Do You Do?</h2>
+                <div class="card-icon" style="background:#d5f5e3;color:#27ae60;">&#x1f517;</div>
+                <h2>Logic Chains &mdash; Connect Your Work to Results</h2>
             </div>
-            <div class="card-desc">Activities are the specific actions, services, or processes your organization carries out. What do you do with your resources?</div>
+            <div class="card-desc">Build connected chains that show how each activity leads to specific outputs, then to short-term and medium-term outcomes. Each chain is one horizontal flow through your logic model.</div>
 
-            <div class="form-group">
-                <label>What types of activities does your organization perform? (select all that apply)</label>
-                <div class="checkbox-group" id="activityTypes">
-                    <label><input type="checkbox" value="Teaching/Instruction"> Teaching / Instruction</label>
-                    <label><input type="checkbox" value="Coaching/Mentoring"> Coaching / Mentoring</label>
-                    <label><input type="checkbox" value="Professional Development/Training"> Prof. Development</label>
-                    <label><input type="checkbox" value="Workshops/Seminars"> Workshops / Seminars</label>
-                    <label><input type="checkbox" value="Assessments/Testing"> Assessments / Testing</label>
-                    <label><input type="checkbox" value="Curriculum Development"> Curriculum Dev.</label>
-                    <label><input type="checkbox" value="Software/Platform Development"> Software / Platform Dev.</label>
-                    <label><input type="checkbox" value="Research/Data Collection"> Research / Data</label>
-                    <label><input type="checkbox" value="Community Engagement"> Community Engagement</label>
-                    <label><input type="checkbox" value="Technical Support"> Technical Support</label>
-                    <label><input type="checkbox" value="Other" id="activityOtherCb"> Other</label>
-                </div>
-                <div class="form-group" id="activityOtherGroup" style="display:none;margin-top:0.5rem;">
-                    <input type="text" id="activityOther" placeholder="Specify other activity type">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Describe your core activities in more detail:</label>
-                <div class="hint">For each major activity, briefly describe what it entails and who it serves.</div>
-                <div class="dynamic-list" id="activityDetails">
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Deliver 10-week coding bootcamp for high school students">
+            <!-- GLOBAL SETTINGS -->
+            <div class="chain-global-settings">
+                <h3 style="font-size:1.05rem; margin-bottom:0.75rem;">Program Delivery Context</h3>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="activityFrequency">Activity Frequency</label>
+                        <select id="activityFrequency">
+                            <option value="">Select frequency...</option>
+                            <option value="Daily">Daily</option>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Quarterly">Quarterly / Per semester</option>
+                            <option value="Annually">Annually</option>
+                            <option value="Ongoing/Continuous">Ongoing / Continuous access</option>
+                            <option value="Varies by program">Varies by program</option>
+                        </select>
                     </div>
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Train teachers on integrating tech into STEM lessons">
-                    </div>
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Administer pre/post assessments to measure learning gains">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="deliveryMode">Delivery Mode</label>
+                        <select id="deliveryMode">
+                            <option value="">Select delivery mode...</option>
+                            <option value="In-person">In-person</option>
+                            <option value="Fully online/virtual">Fully online / Virtual</option>
+                            <option value="Hybrid (in-person + online)">Hybrid</option>
+                            <option value="Self-paced digital platform">Self-paced digital platform</option>
+                            <option value="Multiple modes">Multiple modes</option>
+                        </select>
                     </div>
                 </div>
-                <button class="add-btn" onclick="addListItem('activityDetails', 'Describe another activity...')">+ Add Activity</button>
-            </div>
 
-            <div class="form-group">
-                <label for="activityFrequency">How frequently are these activities delivered?</label>
-                <select id="activityFrequency">
-                    <option value="">Select frequency...</option>
-                    <option value="Daily">Daily</option>
-                    <option value="Weekly">Weekly</option>
-                    <option value="Monthly">Monthly</option>
-                    <option value="Quarterly">Quarterly / Per semester</option>
-                    <option value="Annually">Annually</option>
-                    <option value="Ongoing/Continuous">Ongoing / Continuous access</option>
-                    <option value="Varies by program">Varies by program</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="deliveryMode">Primary delivery mode:</label>
-                <select id="deliveryMode">
-                    <option value="">Select delivery mode...</option>
-                    <option value="In-person">In-person</option>
-                    <option value="Fully online/virtual">Fully online / Virtual</option>
-                    <option value="Hybrid (in-person + online)">Hybrid</option>
-                    <option value="Self-paced digital platform">Self-paced digital platform</option>
-                    <option value="Multiple modes">Multiple modes</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="nav-buttons">
-            <button class="btn btn-secondary" onclick="prevStep()">&#x2190; Back</button>
-            <button class="btn btn-primary" onclick="nextStep()">Outputs &#x2192;</button>
-        </div>
-    </div>
-
-    <!-- STEP 3: OUTPUTS -->
-    <div class="section-page" id="step-3">
-        <div class="card fade-in">
-            <div class="card-header">
-                <div class="card-icon" style="background:#e8edf3;color:#2C3E5A;">&#x1f4c8;</div>
-                <h2>Outputs &mdash; What Will You Measure?</h2>
-            </div>
-            <div class="card-desc">Outputs are the direct, countable products of your activities. These are the "how much" and "how many" metrics.</div>
-
-            <div class="form-group">
-                <label>Who do you serve and how many annually?</label>
-                <div class="hint">Enter each participant group and your annual target number.</div>
-                <div class="dynamic-list" id="participantTargets">
-                    <div class="list-item paired-row">
-                        <input type="text" class="pair-group" placeholder="e.g., Students">
-                        <input type="text" class="pair-count" placeholder="e.g., 500">
-                        <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
+                <div class="form-group" style="margin-top:1rem;">
+                    <label>Who do you serve and how many annually?</label>
+                    <div class="hint">Enter each participant group and your annual target number.</div>
+                    <div class="dynamic-list" id="participantTargets">
+                        <div class="list-item paired-row">
+                            <input type="text" class="pair-group" placeholder="e.g., Students">
+                            <input type="text" class="pair-count" placeholder="e.g., 500">
+                            <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
+                        </div>
+                        <div class="list-item paired-row">
+                            <input type="text" class="pair-group" placeholder="e.g., Teachers">
+                            <input type="text" class="pair-count" placeholder="e.g., 50">
+                            <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
+                        </div>
                     </div>
-                    <div class="list-item paired-row">
-                        <input type="text" class="pair-group" placeholder="e.g., Teachers">
-                        <input type="text" class="pair-count" placeholder="e.g., 50">
-                        <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
-                    </div>
-                    <div class="list-item paired-row">
-                        <input type="text" class="pair-group" placeholder="e.g., Schools">
-                        <input type="text" class="pair-count" placeholder="e.g., 10">
-                        <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
-                    </div>
+                    <button class="add-btn" onclick="addPairedListItem('participantTargets')">+ Add Participant Group</button>
                 </div>
-                <button class="add-btn" onclick="addPairedListItem('participantTargets')">+ Add Participant Group</button>
-            </div>
 
-            <div class="form-group">
-                <label>What specific outputs will your activities produce?</label>
-                <div class="hint">Think about what you can count: sessions held, materials created, participants served, etc.</div>
-                <div class="dynamic-list" id="specificOutputs">
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., # of training sessions delivered">
-                    </div>
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., # of students completing the program">
-                    </div>
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., # of curriculum modules developed">
-                    </div>
+                <div class="form-group">
+                    <label for="dataCollection">Data collection methods:</label>
+                    <textarea id="dataCollection" rows="2" placeholder="e.g., Platform analytics, sign-in sheets, LMS tracking, pre/post surveys"></textarea>
                 </div>
-                <button class="add-btn" onclick="addListItem('specificOutputs', 'e.g., # of assessments administered')">+ Add Output</button>
             </div>
 
-            <div class="form-group">
-                <label for="dataCollection">How do you currently collect data on these outputs? (or how do you plan to?)</label>
-                <textarea id="dataCollection" rows="2" placeholder="e.g., Platform analytics, sign-in sheets, LMS tracking, CRM system"></textarea>
+            <!-- CHAIN CARDS -->
+            <h3 style="font-size:1.05rem; margin: 1.5rem 0 0.5rem; padding-top:1rem; border-top:1px solid var(--border);">Your Logic Chains</h3>
+            <div class="hint" style="margin-bottom:1rem;">Each chain shows how one activity leads through to a medium-term outcome. Add one chain per major activity or program strand.</div>
+
+            <div id="logicChains">
+                <!-- Chain cards inserted dynamically by addLogicChain() -->
             </div>
-        </div>
+            <button class="add-btn" onclick="addLogicChain()" style="margin-top:0.5rem;">+ Add Logic Chain</button>
 
-        <div class="nav-buttons">
-            <button class="btn btn-secondary" onclick="prevStep()">&#x2190; Back</button>
-            <button class="btn btn-primary" onclick="nextStep()">Outcomes &#x2192;</button>
-        </div>
-    </div>
-
-    <!-- STEP 4: OUTCOMES (SHORT + MEDIUM) -->
-    <div class="section-page" id="step-4">
-        <div class="card fade-in">
-            <div class="card-header">
-                <div class="card-icon" style="background:#fdebd0;color:#D4644A;">&#x1f31f;</div>
-                <h2>Outcomes &mdash; What Changes Do You Expect?</h2>
-            </div>
-            <div class="card-desc">Outcomes are the changes that happen as a result of your work. Think about short-term and medium-term changes.</div>
-
-            <h3 style="font-size:1.05rem; margin: 1.5rem 0 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--border);">Short-Term Outcomes (1-3 years)</h3>
-
-            <div class="form-group">
-                <label>What changes in knowledge, skills, or awareness do you expect in the short term?</label>
-                <div class="dynamic-list" id="shortKnowledge">
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Increased digital literacy among students">
-                    </div>
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Teachers gain confidence using new technology">
-                    </div>
-                </div>
-                <button class="add-btn" onclick="addListItem('shortKnowledge', 'Describe another expected change...')">+ Add Outcome</button>
-            </div>
-
-            <div class="form-group">
-                <label>What initial behavioral changes do you expect to see?</label>
-                <div class="dynamic-list" id="shortBehavior">
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Students voluntarily engage in coding projects">
-                    </div>
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Teachers integrate tech into lesson plans weekly">
-                    </div>
-                </div>
-                <button class="add-btn" onclick="addListItem('shortBehavior', 'Describe another behavioral change...')">+ Add Outcome</button>
-            </div>
-
-            <div class="form-group">
-                <label for="shortFeedback">What early feedback or satisfaction metrics will you track?</label>
-                <textarea id="shortFeedback" rows="2" placeholder="e.g., Participant satisfaction surveys, Net Promoter Score, engagement rates"></textarea>
-            </div>
-
-            <h3 style="font-size:1.05rem; margin: 1.5rem 0 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--border);">Medium-Term Outcomes (3-5 years)</h3>
-
-            <div class="form-group">
-                <label>What sustained practice or behavioral changes do you expect?</label>
-                <div class="dynamic-list" id="medBehavior">
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Schools adopt technology-integrated curriculum districtwide">
-                    </div>
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Students pursue STEM careers at higher rates">
-                    </div>
-                </div>
-                <button class="add-btn" onclick="addListItem('medBehavior', 'Describe another sustained change...')">+ Add Outcome</button>
-            </div>
-
-            <div class="form-group">
-                <label>What organizational or systemic changes do you hope to influence?</label>
-                <div class="dynamic-list" id="medSystemic">
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Partner districts increase STEM funding">
-                    </div>
-                    <div class="list-item">
-                        <input type="text" placeholder="e.g., Policy changes support equitable tech access">
-                    </div>
-                </div>
-                <button class="add-btn" onclick="addListItem('medSystemic', 'Describe another systemic change...')">+ Add Outcome</button>
-            </div>
-
-            <h3>Quantitative Targets</h3>
+            <!-- QUANTITATIVE TARGETS -->
+            <h3 style="font-size:1.05rem; margin: 1.5rem 0 0.75rem; padding-top:1rem; border-top:1px solid var(--border);">Quantitative Targets</h3>
             <div class="hint" style="margin-bottom:0.75rem;">Set specific, measurable targets for your key outcomes. What numbers will demonstrate success?</div>
 
             <div class="dynamic-list" id="quantTargets">
@@ -1411,19 +1364,6 @@
                     <input type="text" class="qt-metric" placeholder="Metric (e.g., Student proficiency rate)">
                     <input type="text" class="qt-baseline" placeholder="Baseline (e.g., 40%)">
                     <input type="text" class="qt-target" placeholder="Target (e.g., 80%)">
-                    <select class="qt-timeframe">
-                        <option value="">Timeframe</option>
-                        <option>1 Year</option>
-                        <option>2 Years</option>
-                        <option>3 Years</option>
-                        <option>5 Years</option>
-                    </select>
-                    <button class="remove-btn" onclick="this.parentElement.remove()" title="Remove">&times;</button>
-                </div>
-                <div class="list-item quant-row">
-                    <input type="text" class="qt-metric" placeholder="Metric (e.g., Teacher retention rate)">
-                    <input type="text" class="qt-baseline" placeholder="Baseline">
-                    <input type="text" class="qt-target" placeholder="Target">
                     <select class="qt-timeframe">
                         <option value="">Timeframe</option>
                         <option>1 Year</option>
@@ -1443,8 +1383,8 @@
         </div>
     </div>
 
-    <!-- STEP 5: IMPACTS -->
-    <div class="section-page" id="step-5">
+    <!-- STEP 3: IMPACTS -->
+    <div class="section-page" id="step-3">
         <div class="card fade-in">
             <div class="card-header">
                 <div class="card-icon" style="background:#d5f5e3;color:#27ae60;">&#x1f30d;</div>
@@ -1484,8 +1424,8 @@
         </div>
     </div>
 
-    <!-- STEP 6: THEORY OF CHANGE -->
-    <div class="section-page" id="step-6">
+    <!-- STEP 4: THEORY OF CHANGE -->
+    <div class="section-page" id="step-4">
         <div class="card fade-in">
             <div class="card-header">
                 <div class="card-icon" style="background:#fce8e4;color:#D4644A;">&#x1f4a1;</div>
@@ -1542,8 +1482,8 @@
         </div>
     </div>
 
-    <!-- STEP 7: REVIEW & GENERATE -->
-    <div class="section-page" id="step-7">
+    <!-- STEP 5: REVIEW & GENERATE -->
+    <div class="section-page" id="step-5">
         <div class="card fade-in">
             <div class="card-header">
                 <div class="card-icon" style="background:#eaf2f8;color:var(--primary);">&#x2705;</div>
@@ -1638,7 +1578,7 @@
 <script>
 // ========== STATE ==========
 let currentStep = 0;
-const totalSteps = 8;
+const totalSteps = 6;
 
 // ========== NAVIGATION ==========
 function goToStep(step) {
@@ -1651,7 +1591,7 @@ function nextStep() {
     if (currentStep < totalSteps - 1) {
         showStep(currentStep + 1);
     }
-    if (currentStep === 7) {
+    if (currentStep === 5) {
         buildReviewSummary();
     }
 }
@@ -1682,7 +1622,7 @@ function showStep(step) {
     currentStep = step;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (step === 7) buildReviewSummary();
+    if (step === 5) buildReviewSummary();
 }
 
 function validateStep0() {
@@ -1777,10 +1717,92 @@ document.getElementById('fundingOtherCb').addEventListener('change', function() 
     document.getElementById('fundingOtherGroup').style.display = this.checked ? 'block' : 'none';
     if (this.checked) document.getElementById('fundingOther').focus();
 });
-document.getElementById('activityOtherCb').addEventListener('change', function() {
-    document.getElementById('activityOtherGroup').style.display = this.checked ? 'block' : 'none';
-    if (this.checked) document.getElementById('activityOther').focus();
-});
+// ========== LOGIC CHAIN FUNCTIONS ==========
+function addLogicChain(prefill) {
+    const container = document.getElementById('logicChains');
+    const index = container.querySelectorAll('.logic-chain-card').length;
+    const div = document.createElement('div');
+    div.className = 'logic-chain-card';
+    div.dataset.chainIndex = index;
+    div.innerHTML = `
+        <div class="chain-card-header">
+            <span class="chain-number">Chain ${index + 1}</span>
+            <button class="remove-btn" onclick="removeLogicChain(this)" title="Remove chain">&times;</button>
+        </div>
+        <div class="chain-flow">
+            <div class="chain-field">
+                <label>Activity</label>
+                <div class="hint">What do you do?</div>
+                <input type="text" class="chain-activity" placeholder="e.g., Conduct professional development workshops" value="${esc(prefill?.activity || '')}">
+                <select class="chain-activity-type">
+                    <option value="">Activity type...</option>
+                    <option value="Teaching/Instruction">Teaching / Instruction</option>
+                    <option value="Coaching/Mentoring">Coaching / Mentoring</option>
+                    <option value="Professional Development/Training">Prof. Development</option>
+                    <option value="Workshops/Seminars">Workshops / Seminars</option>
+                    <option value="Assessments/Testing">Assessments / Testing</option>
+                    <option value="Curriculum Development">Curriculum Dev.</option>
+                    <option value="Software/Platform Development">Software / Platform Dev.</option>
+                    <option value="Research/Data Collection">Research / Data</option>
+                    <option value="Community Engagement">Community Engagement</option>
+                    <option value="Technical Support">Technical Support</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="chain-arrow">&#x2192;</div>
+            <div class="chain-field">
+                <label>Output</label>
+                <div class="hint">What do you produce/count?</div>
+                <input type="text" class="chain-output" placeholder="e.g., 30 workshops delivered per year" value="${esc(prefill?.output || '')}">
+                <input type="text" class="chain-output-target" placeholder="Target # (e.g., 30)" value="${esc(prefill?.outputTarget || '')}">
+            </div>
+            <div class="chain-arrow">&#x2192;</div>
+            <div class="chain-field">
+                <label>Short-term Outcome</label>
+                <div class="hint">1-3 year change</div>
+                <input type="text" class="chain-short-outcome" placeholder="e.g., Teachers gain new instructional strategies" value="${esc(prefill?.shortOutcome || '')}">
+            </div>
+            <div class="chain-arrow">&#x2192;</div>
+            <div class="chain-field">
+                <label>Medium-term Outcome</label>
+                <div class="hint">3-5 year change</div>
+                <input type="text" class="chain-med-outcome" placeholder="e.g., Sustained improvement in teaching practice" value="${esc(prefill?.medOutcome || '')}">
+            </div>
+        </div>`;
+    container.appendChild(div);
+    if (prefill?.activityType) {
+        const sel = div.querySelector('.chain-activity-type');
+        for (let opt of sel.options) {
+            if (opt.value === prefill.activityType) { sel.value = opt.value; break; }
+        }
+    }
+    renumberChains();
+    if (!prefill) div.querySelector('.chain-activity').focus();
+}
+
+function removeLogicChain(btn) {
+    btn.closest('.logic-chain-card').remove();
+    renumberChains();
+}
+
+function renumberChains() {
+    document.querySelectorAll('#logicChains .logic-chain-card').forEach((card, i) => {
+        card.dataset.chainIndex = i;
+        card.querySelector('.chain-number').textContent = 'Chain ' + (i + 1);
+    });
+}
+
+function getLogicChainValues() {
+    const cards = document.querySelectorAll('#logicChains .logic-chain-card');
+    return Array.from(cards).map(card => ({
+        activity: card.querySelector('.chain-activity')?.value.trim() || '',
+        activityType: card.querySelector('.chain-activity-type')?.value || '',
+        output: card.querySelector('.chain-output')?.value.trim() || '',
+        outputTarget: card.querySelector('.chain-output-target')?.value.trim() || '',
+        shortOutcome: card.querySelector('.chain-short-outcome')?.value.trim() || '',
+        medOutcome: card.querySelector('.chain-med-outcome')?.value.trim() || ''
+    })).filter(c => c.activity || c.output || c.shortOutcome || c.medOutcome);
+}
 
 // ========== COLLECT DATA ==========
 function collectData() {
@@ -1809,30 +1831,23 @@ function collectData() {
     data.techAssets = getListValues('techAssets');
     data.otherInputs = document.getElementById('otherInputs').value.trim();
 
-    // Activities
-    data.activityTypes = getCheckedValues('activityTypes');
-    const activityOtherIdx = data.activityTypes.indexOf('Other');
-    if (activityOtherIdx !== -1) {
-        const activityOtherVal = document.getElementById('activityOther').value.trim();
-        if (activityOtherVal) { data.activityTypes[activityOtherIdx] = activityOtherVal; }
-        else { data.activityTypes.splice(activityOtherIdx, 1); }
-    }
-    data.activityDetails = getListValues('activityDetails');
+    // Logic Chains (Step 2)
+    data.logicChains = getLogicChainValues();
     data.activityFrequency = document.getElementById('activityFrequency').value;
     data.deliveryMode = document.getElementById('deliveryMode').value;
-
-    // Outputs
     data.participantTargets = getPairedListValues('participantTargets');
-    data.specificOutputs = getListValues('specificOutputs');
     data.dataCollection = document.getElementById('dataCollection').value.trim();
-
-    // Outcomes
-    data.shortKnowledge = getListValues('shortKnowledge');
-    data.shortBehavior = getListValues('shortBehavior');
-    data.shortFeedback = document.getElementById('shortFeedback').value.trim();
-    data.medBehavior = getListValues('medBehavior');
-    data.medSystemic = getListValues('medSystemic');
     data.quantTargets = getQuantTargetValues();
+
+    // Derived arrays for backward compatibility with ToC, measurements, AI generation
+    data.activityTypes = [...new Set(data.logicChains.map(c => c.activityType).filter(Boolean))];
+    data.activityDetails = data.logicChains.map(c => c.activity).filter(Boolean);
+    data.specificOutputs = data.logicChains.map(c => c.output).filter(Boolean);
+    data.shortKnowledge = data.logicChains.map(c => c.shortOutcome).filter(Boolean);
+    data.shortBehavior = [];
+    data.shortFeedback = '';
+    data.medBehavior = data.logicChains.map(c => c.medOutcome).filter(Boolean);
+    data.medSystemic = [];
 
     // Impacts
     data.impactPopulation = getListValues('impactPopulation');
@@ -1877,21 +1892,13 @@ function buildReviewSummary() {
             data.partnerships.length ? `<strong>Partners:</strong> ${data.partnerships.join(', ')}` : null,
             data.techAssets.length ? `<strong>Tech/Assets:</strong> ${data.techAssets.join(', ')}` : null,
         ]},
-        { title: 'Activities', items: [
-            data.activityTypes.length ? `<strong>Types:</strong> ${data.activityTypes.join(', ')}` : null,
-            data.activityDetails.length ? `<strong>Details:</strong> ${data.activityDetails.join('; ')}` : null,
+        { title: 'Logic Chains', items: [
+            ...(data.logicChains || []).map((c, i) =>
+                `<strong>Chain ${i+1}:</strong> ${c.activity || '?'} &rarr; ${c.output || '?'} &rarr; ${c.shortOutcome || '?'} &rarr; ${c.medOutcome || '?'}`
+            ),
             data.activityFrequency ? `<strong>Frequency:</strong> ${data.activityFrequency}` : null,
             data.deliveryMode ? `<strong>Mode:</strong> ${data.deliveryMode}` : null,
-        ]},
-        { title: 'Outputs', items: [
             (data.participantTargets || []).length ? `<strong>Participants:</strong> ${data.participantTargets.map(p => p.target ? p.group + ' (' + p.target + ')' : p.group).join(', ')}` : null,
-            data.specificOutputs.length ? `<strong>Outputs:</strong> ${data.specificOutputs.join('; ')}` : null,
-        ]},
-        { title: 'Outcomes', items: [
-            data.shortKnowledge.length ? `<strong>Short-term (knowledge):</strong> ${data.shortKnowledge.join('; ')}` : null,
-            data.shortBehavior.length ? `<strong>Short-term (behavior):</strong> ${data.shortBehavior.join('; ')}` : null,
-            data.medBehavior.length ? `<strong>Medium-term (practice):</strong> ${data.medBehavior.join('; ')}` : null,
-            data.medSystemic.length ? `<strong>Medium-term (systemic):</strong> ${data.medSystemic.join('; ')}` : null,
             data.quantTargets.length ? `<strong>Targets:</strong> ${data.quantTargets.map(t => t.metric + ' (' + t.baseline + ' → ' + t.target + (t.timeframe ? ', ' + t.timeframe : '') + ')').join('; ')}` : null,
         ]},
         { title: 'Impacts', items: [
@@ -1960,62 +1967,65 @@ function renderLogicModel(data) {
         data.otherInputs
     ].filter(Boolean);
 
-    const activitiesList = [
-        ...data.activityTypes,
-        ...data.activityDetails.filter(d => !data.activityTypes.some(t => d.toLowerCase().includes(t.toLowerCase())))
-    ].filter(Boolean);
-
-    const outputsList = [
-        ...(data.participantTargets || []).map(p => p.target ? `${p.group}: ${p.target}` : p.group),
-        ...data.specificOutputs
-    ].filter(Boolean);
-
-    const shortOutcomes = [
-        ...data.shortKnowledge,
-        ...data.shortBehavior,
-        data.shortFeedback
-    ].filter(Boolean);
-
-    const medOutcomes = [
-        ...data.medBehavior,
-        ...data.medSystemic
-    ].filter(Boolean);
-
     const impacts = [
         ...data.impactPopulation,
         ...data.impactSocietal
     ].filter(Boolean);
+
+    const chains = data.logicChains || [];
+
+    const chainRowsHtml = chains.length
+        ? chains.map(c => `<div class="lm-chain-row">
+            <div class="lm-chain-cell">${esc(c.activity)}${c.activityType ? '<br><em style="font-size:0.6rem;color:var(--text-light);">' + esc(c.activityType) + '</em>' : ''}</div>
+            <div class="lm-chain-cell">${esc(c.output)}${c.outputTarget ? ' <strong>(' + esc(c.outputTarget) + ')</strong>' : ''}</div>
+            <div class="lm-chain-cell">${esc(c.shortOutcome)}</div>
+            <div class="lm-chain-cell">${esc(c.medOutcome)}</div>
+          </div>`).join('')
+        : '<div class="lm-chain-row"><div class="lm-chain-cell" style="grid-column:span 4;text-align:center;color:#bbb;font-style:italic;">No logic chains defined</div></div>';
+
+    const inputsHtml = inputsList.length
+        ? inputsList.map(i => `<li>${esc(i)}</li>`).join('')
+        : '<li style="color:#bbb;font-style:italic;">Not specified</li>';
+
+    const impactsHtml = impacts.length
+        ? impacts.map(i => `<li>${esc(i)}</li>`).join('')
+        : '<li style="color:#bbb;font-style:italic;">Not specified</li>';
 
     el.innerHTML = `
         <div class="print-only" style="text-align:center;margin-bottom:0.5rem;font-size:0.7rem;color:#999;">Generated by Logic Model Generator</div>
         <div class="lm-title">${esc(data.orgName)} Logic Model${programLabel}</div>
         <div class="lm-subtitle">${esc(data.orgType)} &bull; Target: ${esc(data.targetPop)}</div>
         <div style="text-align:center;font-size:0.8rem;color:var(--text-light);margin-bottom:1rem;font-style:italic;max-width:600px;margin-left:auto;margin-right:auto;">"${esc(data.mission)}"</div>
-        <div class="lm-grid">
-            ${buildColumn('Inputs', 'What do we need?', inputsList)}
-            ${buildColumn('Activities', 'What do we do?', activitiesList)}
-            ${buildColumn('Outputs', 'What do we measure?', outputsList)}
-            ${buildColumn('Short-term Outcomes', '1-3 Years', shortOutcomes)}
-            ${buildColumn('Med-term Outcomes', '3-5 Years', medOutcomes)}
-            ${buildColumn('Impacts', '5+ Years', impacts)}
+        <div class="lm-connected-grid">
+            <div class="lm-bookend">
+                <div class="lm-col-header" style="background:#1E2A42;">Inputs</div>
+                <div class="lm-col-question" style="background:#1E2A42;">What do we need?</div>
+                <div class="lm-col-body"><ul>${inputsHtml}</ul></div>
+            </div>
+            <div class="lm-chain-area">
+                <div class="lm-chain-headers">
+                    <div><div class="lm-col-header" style="background:#2C3E5A;">Activities</div><div class="lm-col-question" style="background:#2C3E5A;">What do we do?</div></div>
+                    <div><div class="lm-col-header" style="background:#3A5070;">Outputs</div><div class="lm-col-question" style="background:#3A5070;">What do we measure?</div></div>
+                    <div><div class="lm-col-header" style="background:#D4644A;">Short-term</div><div class="lm-col-question" style="background:#D4644A;">1-3 Years</div></div>
+                    <div><div class="lm-col-header" style="background:#B8533D;">Med-term</div><div class="lm-col-question" style="background:#B8533D;">3-5 Years</div></div>
+                </div>
+                ${chainRowsHtml}
+            </div>
+            <div class="lm-bookend">
+                <div class="lm-col-header" style="background:#27ae60;">Impacts</div>
+                <div class="lm-col-question" style="background:#27ae60;">5+ Years</div>
+                <div class="lm-col-body"><ul>${impactsHtml}</ul></div>
+            </div>
         </div>
-        ${data.deliveryMode || data.activityFrequency ? `<div style="text-align:center;margin-top:0.75rem;font-size:0.75rem;color:var(--text-light);">
-            ${data.deliveryMode ? `Delivery: ${esc(data.deliveryMode)}` : ''}
-            ${data.deliveryMode && data.activityFrequency ? ' &bull; ' : ''}
-            ${data.activityFrequency ? `Frequency: ${esc(data.activityFrequency)}` : ''}
-        </div>` : ''}
+        ${data.deliveryMode || data.activityFrequency ? '<div style="text-align:center;margin-top:0.75rem;font-size:0.75rem;color:var(--text-light);">'
+            + (data.deliveryMode ? 'Delivery: ' + esc(data.deliveryMode) : '')
+            + (data.deliveryMode && data.activityFrequency ? ' &bull; ' : '')
+            + (data.activityFrequency ? 'Frequency: ' + esc(data.activityFrequency) : '')
+            + '</div>' : ''}
+        ${(data.participantTargets || []).length ? '<div style="text-align:center;margin-top:0.3rem;font-size:0.75rem;color:var(--text-light);">Participants: '
+            + data.participantTargets.map(p => esc(p.group) + (p.target ? ' (' + esc(p.target) + ')' : '')).join(', ')
+            + '</div>' : ''}
     `;
-}
-
-function buildColumn(title, question, items) {
-    const listItems = items.length
-        ? items.map(i => `<li>${esc(i)}</li>`).join('')
-        : '<li style="color:#bbb;font-style:italic;">Not specified</li>';
-    return `<div class="lm-col">
-        <div class="lm-col-header">${title}</div>
-        <div class="lm-col-question">${question}</div>
-        <div class="lm-col-body"><ul>${listItems}</ul></div>
-    </div>`;
 }
 
 // ========== THEORY OF CHANGE ==========
@@ -2083,6 +2093,22 @@ function renderTheoryOfChange(data) {
 function renderDetailSections(data) {
     const el = document.getElementById('detailSections');
 
+    const chains = data.logicChains || [];
+    const chainsContent = chains.length
+        ? chains.map((c, i) => `
+            <div style="margin-bottom:1rem;padding:0.75rem;background:#faf9f7;border-radius:8px;border:1px solid var(--border);">
+                <strong>Chain ${i+1}: ${esc(c.activity || 'Untitled')}</strong>
+                ${c.activityType ? ' <em style="color:var(--text-light);">(' + esc(c.activityType) + ')</em>' : ''}
+                <div style="margin-top:0.4rem;font-size:0.85rem;line-height:1.6;">
+                    <span style="color:var(--primary);font-weight:600;">Activity:</span> ${esc(c.activity)}<br>
+                    <span style="color:var(--primary);font-weight:600;">Output:</span> ${esc(c.output)}${c.outputTarget ? ' (Target: ' + esc(c.outputTarget) + ')' : ''}<br>
+                    <span style="color:var(--primary);font-weight:600;">Short-term Outcome:</span> ${esc(c.shortOutcome)}<br>
+                    <span style="color:var(--primary);font-weight:600;">Medium-term Outcome:</span> ${esc(c.medOutcome)}
+                </div>
+            </div>
+        `).join('')
+        : '<p style="color:#999;font-style:italic;">No logic chains defined.</p>';
+
     const sections = [
         {
             icon: '&#x1f4b0;',
@@ -2096,40 +2122,14 @@ function renderDetailSections(data) {
             ])
         },
         {
-            icon: '&#x2699;&#xFE0F;',
-            title: 'Activities',
-            content: buildDetailList([
-                { label: 'Activity Types', items: data.activityTypes },
-                { label: 'Activity Details', items: data.activityDetails },
-                data.activityFrequency ? { label: 'Delivery Frequency', text: data.activityFrequency } : null,
-                data.deliveryMode ? { label: 'Delivery Mode', text: data.deliveryMode } : null,
-            ])
-        },
-        {
-            icon: '&#x1f4c8;',
-            title: 'Outputs',
-            content: buildDetailList([
-                (data.participantTargets || []).length ? { label: 'Participant Targets', items: data.participantTargets.map(p => p.target ? `${p.group}: ${p.target}` : p.group) } : null,
-                { label: 'Specific Outputs', items: data.specificOutputs },
-                data.dataCollection ? { label: 'Data Collection Methods', text: data.dataCollection } : null,
-            ])
-        },
-        {
-            icon: '&#x1f31f;',
-            title: 'Short-Term Outcomes (1-3 Years)',
-            content: buildDetailList([
-                { label: 'Knowledge & Skills Changes', items: data.shortKnowledge },
-                { label: 'Behavioral Changes', items: data.shortBehavior },
-                data.shortFeedback ? { label: 'Feedback & Satisfaction', text: data.shortFeedback } : null,
-            ])
-        },
-        {
-            icon: '&#x1f4a1;',
-            title: 'Medium-Term Outcomes (3-5 Years)',
-            content: buildDetailList([
-                { label: 'Sustained Practice Changes', items: data.medBehavior },
-                { label: 'Systemic Changes', items: data.medSystemic },
-            ]) + buildQuantTargetsTable(data.quantTargets)
+            icon: '&#x1f517;',
+            title: 'Logic Chains (Activities &rarr; Outcomes)',
+            content: chainsContent
+                + (data.activityFrequency ? `<p><strong>Delivery Frequency:</strong> ${esc(data.activityFrequency)}</p>` : '')
+                + (data.deliveryMode ? `<p><strong>Delivery Mode:</strong> ${esc(data.deliveryMode)}</p>` : '')
+                + ((data.participantTargets || []).length ? `<p><strong>Participant Targets:</strong> ${data.participantTargets.map(p => esc(p.group) + (p.target ? ': ' + esc(p.target) : '')).join(', ')}</p>` : '')
+                + (data.dataCollection ? `<p><strong>Data Collection:</strong> ${esc(data.dataCollection)}</p>` : '')
+                + buildQuantTargetsTable(data.quantTargets)
         },
         {
             icon: '&#x1f30d;',
@@ -2315,6 +2315,23 @@ function generateMeasurementSuggestions(data) {
     }
     suggestions.push({ icon: '&#x1f4c8;', title: 'Output Measures (Activity Tracking)', measures: outputMeasures });
 
+    // CHAIN-SPECIFIC OUTCOME MEASURES
+    if (data.logicChains && data.logicChains.length) {
+        const chainMeasures = [];
+        data.logicChains.forEach((c, i) => {
+            if (c.shortOutcome && c.activity) {
+                chainMeasures.push({
+                    name: `Chain ${i+1}: ${c.shortOutcome.substring(0, 50)}${c.shortOutcome.length > 50 ? '...' : ''}`,
+                    type: 'mixed',
+                    description: `Track progress on "${c.shortOutcome}" resulting from "${c.activity}". ${c.outputTarget ? 'Monitor whether achieving the output target (' + c.outputTarget + ') correlates with this outcome.' : ''} Use pre/post assessments or surveys to measure change. ${c.medOutcome ? 'Long-term, assess whether this leads to "' + c.medOutcome + '".' : ''}`
+                });
+            }
+        });
+        if (chainMeasures.length) {
+            suggestions.push({ icon: '&#x1f517;', title: 'Chain-Specific Outcome Measures', measures: chainMeasures });
+        }
+    }
+
     // SHORT-TERM OUTCOME MEASURES
     const shortMeasures = [];
     if (data.shortKnowledge.length) {
@@ -2451,11 +2468,13 @@ function startOver() {
         el.checked = false;
         el.closest('label')?.classList.remove('checked');
     });
+    // Clear logic chains
+    document.getElementById('logicChains').innerHTML = '';
     // Clear saved data from localStorage
     try {
         localStorage.removeItem('lm_form_data');
         localStorage.removeItem('lm_current_step');
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 6; i++) {
             localStorage.removeItem('lm_chat_step_' + i);
             localStorage.removeItem('lm_chat_step_' + i + '_html');
         }
@@ -2491,8 +2510,8 @@ const AI = {
     conversationHistory: [],
     currentAbortController: null,
     stepNames: [
-        'About Your Organization', 'Inputs (Resources)', 'Activities',
-        'Outputs', 'Outcomes', 'Long-Term Impacts', 'Theory of Change', 'Review & Generate'
+        'About Your Organization', 'Inputs (Resources)', 'Logic Chains',
+        'Long-Term Impacts', 'Theory of Change', 'Review & Generate'
     ]
 };
 
@@ -2654,7 +2673,7 @@ function buildCoachSystemPrompt(stepIndex) {
     const fieldMap = getStepFieldMap(stepIndex);
     return `You are a friendly, expert logic model consultant embedded in a Logic Model Generator tool. You help users think through their logic model step by step.
 
-CURRENT STEP: ${stepIndex + 1} of 8 — "${AI.stepNames[stepIndex]}"
+CURRENT STEP: ${stepIndex + 1} of 6 — "${AI.stepNames[stepIndex]}"
 
 ORGANIZATION CONTEXT:
 - Name: ${data.orgName || 'Not yet provided'}
@@ -2718,12 +2737,10 @@ function getStepFieldMap(stepIndex) {
     const maps = [
         `Step 0 fields: {"orgName":"string","orgType":"one of: Ed-Tech Company, Nonprofit Organization, K-12 School/District, Higher Education Institution, Workforce Development, Government Agency, Social Enterprise, Corporate Training","mission":"string","targetPop":"string","programName":"string"}`,
         `Step 1 fields: {"funding":"array, values from: Federal/State Grants, Private Foundation Grants, Venture Capital/Investors, Revenue/Sales, Donations, Subscriptions/Licensing, Corporate Sponsorship, In-kind Support, Other","staffRoles":"array of strings","partnerships":"array of strings","techAssets":"array of strings","otherInputs":"string"}`,
-        `Step 2 fields: {"activityTypes":"array, values from: Teaching/Instruction, Coaching/Mentoring, Professional Development/Training, Workshops/Seminars, Assessments/Testing, Curriculum Development, Software/Platform Development, Research/Data Collection, Community Engagement, Technical Support, Other","activityDetails":"array of strings","activityFrequency":"one of: Daily, Weekly, Monthly, Quarterly, Annually, Ongoing/Continuous, Varies by program","deliveryMode":"one of: In-person, Fully online/virtual, Hybrid (in-person + online), Self-paced digital platform, Multiple modes"}`,
-        `Step 3 fields: {"participantTargets":"array of objects {group: string, target: string} — each participant group with their annual target number","specificOutputs":"array of strings","dataCollection":"string"}`,
-        `Step 4 fields: {"shortKnowledge":"array of strings","shortBehavior":"array of strings","shortFeedback":"string","medBehavior":"array of strings","medSystemic":"array of strings","quantTargets":"array of objects {metric: string, baseline: string, target: string, timeframe: string}"}`,
-        `Step 5 fields: {"impactPopulation":"array of strings","impactSocietal":"array of strings","impactEvidence":"string"}`,
-        `Step 6 fields: {"coreProblem":"string","whyApproach":"string","assumptions":"array of strings","externalFactors":"array of strings"}`,
-        `Step 7: Review step — no fields to fill. Just review their data and suggest improvements.`
+        `Step 2 fields: {"logicChains":"array of objects {activity: string, activityType: one of: Teaching/Instruction, Coaching/Mentoring, Professional Development/Training, Workshops/Seminars, Assessments/Testing, Curriculum Development, Software/Platform Development, Research/Data Collection, Community Engagement, Technical Support, Other, output: string, outputTarget: string, shortOutcome: string, medOutcome: string} — each chain connects an activity to its output to short-term and medium-term outcomes","activityFrequency":"one of: Daily, Weekly, Monthly, Quarterly, Annually, Ongoing/Continuous, Varies by program","deliveryMode":"one of: In-person, Fully online/virtual, Hybrid, Self-paced, Multiple modes","participantTargets":"array of objects {group: string, target: string}","dataCollection":"string","quantTargets":"array of objects {metric, baseline, target, timeframe}"}`,
+        `Step 3 fields: {"impactPopulation":"array of strings","impactSocietal":"array of strings","impactEvidence":"string"}`,
+        `Step 4 fields: {"coreProblem":"string","whyApproach":"string","assumptions":"array of strings","externalFactors":"array of strings"}`,
+        `Step 5: Review step — no fields to fill. Just review their data and suggest improvements.`
     ];
     return maps[stepIndex] || '';
 }
@@ -2788,11 +2805,9 @@ function getStepGreetingPrompt(stepIndex, data) {
     const prompts = [
         `I just started the Logic Model Generator. ${data.orgName ? 'I\'ve entered my org name as "' + data.orgName + '".' : ''} Walk me through each field on this page one at a time — starting with organization type. Ask me about each field, offer suggestions for what to enter, and help me think through my answers.`,
         `I'm now on the Inputs section. Ask me about the resources my ${data.orgType || 'organization'} needs. For each question, give me some tailored suggestions I can pick from based on what you know about my organization.`,
-        `I'm on the Activities section now. Ask me about what activities are most important for a ${data.orgType || 'organization'} serving ${data.targetPop || 'my target audience'}. Provide specific suggestions I can choose from.`,
-        `I'm on Outputs now. First, help me identify the participant groups I serve and set annual target numbers for each. Then ask about other specific, countable outputs — like sessions held or materials created. Provide tailored suggestions.`,
-        `I'm on the Outcomes section. This covers both short-term (1-3 years) and medium-term (3-5 years). Ask me about what changes I expect to see from my work with ${data.targetPop || 'my audience'}. Suggest specific outcomes I might want to track.`,
+        `I'm on the Logic Chains section. This is where I connect my activities to specific outputs and then to outcomes. Each chain is one horizontal flow: Activity → Output → Short-term Outcome → Medium-term Outcome. Help me think through what chains I need for a ${data.orgType || 'organization'} serving ${data.targetPop || 'my target audience'}. Suggest 2-3 complete chains I could start with, and also help me fill in the delivery context (frequency, mode, participants).`,
         `I'm on the Impacts section — the long-term vision (5+ years). Help me think big but realistic about what lasting change my organization can achieve. Suggest specific impact statements.`,
-        `I'm on Theory of Change now. Help me articulate WHY my approach will work and what assumptions I'm making. My activities include: ${(data.activityTypes || []).join(', ') || 'not yet specified'}. Suggest key assumptions and external factors.`,
+        `I'm on Theory of Change now. Help me articulate WHY my approach will work and what assumptions I'm making. My logic chains include: ${(data.logicChains || []).map(c => c.activity).filter(Boolean).join(', ') || 'not yet specified'}. Suggest key assumptions and external factors.`,
         `I'm on the Review step. Can you quickly scan what I've entered and let me know if any sections look thin or if I should strengthen anything before generating?`
     ];
     return prompts[stepIndex] || 'Help me with this section of the logic model.';
@@ -2888,13 +2903,11 @@ function finalizeMessage(msgEl, fullText) {
                 targetPop: 'Target Population', programName: 'Program Name',
                 funding: 'Funding Sources', staffRoles: 'Staff Roles', partnerships: 'Partnerships',
                 techAssets: 'Technology & Assets', otherInputs: 'Other Resources',
-                activityTypes: 'Activity Types', activityDetails: 'Activities',
+                logicChains: 'Logic Chains',
                 activityFrequency: 'Frequency', deliveryMode: 'Delivery Mode',
                 participantTargets: 'Participant Targets',
-                specificOutputs: 'Outputs', dataCollection: 'Data Collection',
-                shortKnowledge: 'Knowledge Outcomes', shortBehavior: 'Behavioral Outcomes',
-                shortFeedback: 'Feedback Metrics', medBehavior: 'Medium-term Practices',
-                medSystemic: 'Systemic Changes', quantTargets: 'Quantitative Targets',
+                dataCollection: 'Data Collection',
+                quantTargets: 'Quantitative Targets',
                 impactPopulation: 'Population Impact',
                 impactSocietal: 'Societal Impact', impactEvidence: 'Evidence of Success',
                 coreProblem: 'Core Problem', whyApproach: 'Why This Works',
@@ -2962,7 +2975,7 @@ function applyFieldValue(field, value) {
 
     // Text inputs and textareas
     const textFields = ['orgName','mission','targetPop','programName','otherInputs',
-        'dataCollection','shortFeedback','impactEvidence',
+        'dataCollection','impactEvidence',
         'coreProblem','whyApproach'];
     if (textFields.includes(field)) {
         const el = document.getElementById(field);
@@ -2987,13 +3000,17 @@ function applyFieldValue(field, value) {
         return;
     }
 
+    // Logic chains
+    if (field === 'logicChains' && Array.isArray(value)) {
+        value.forEach(chainData => addLogicChain(chainData));
+        return;
+    }
+
     // Checkbox groups (with "Other" support)
     const checkboxMap = {
-        'funding': 'fundingSources',
-        'activityTypes': 'activityTypes'
+        'funding': 'fundingSources'
     };
-    const otherMap = { funding: { cbId: 'fundingOtherCb', groupId: 'fundingOtherGroup', inputId: 'fundingOther' },
-                       activityTypes: { cbId: 'activityOtherCb', groupId: 'activityOtherGroup', inputId: 'activityOther' } };
+    const otherMap = { funding: { cbId: 'fundingOtherCb', groupId: 'fundingOtherGroup', inputId: 'fundingOther' } };
     if (checkboxMap[field] && Array.isArray(value)) {
         const container = document.getElementById(checkboxMap[field]);
         if (container) {
@@ -3062,9 +3079,6 @@ function applyFieldValue(field, value) {
     // Dynamic list fields (arrays of strings)
     const listFields = {
         'staffRoles':'staffRoles','partnerships':'partnerships','techAssets':'techAssets',
-        'activityDetails':'activityDetails','specificOutputs':'specificOutputs',
-        'shortKnowledge':'shortKnowledge','shortBehavior':'shortBehavior',
-        'medBehavior':'medBehavior','medSystemic':'medSystemic',
         'impactPopulation':'impactPopulation','impactSocietal':'impactSocietal',
         'assumptions':'assumptions','externalFactors':'externalFactors'
     };
@@ -3099,9 +3113,19 @@ function applyFieldValue(field, value) {
 function applySuggestionChip(field, value) {
     value = capitalizeFirst(String(value).trim());
 
+    // Logic chains suggestion
+    if (field === 'logicChains') {
+        if (typeof value === 'object' && !Array.isArray(value)) {
+            addLogicChain(value);
+        } else if (Array.isArray(value)) {
+            value.forEach(v => addLogicChain(v));
+        }
+        saveFormData(); showAutosaveIndicator('Chain added!'); return;
+    }
+
     // For text fields — only set if empty, otherwise append
     const textFields = ['orgName','mission','targetPop','programName','otherInputs',
-        'dataCollection','shortFeedback','impactEvidence',
+        'dataCollection','impactEvidence',
         'coreProblem','whyApproach'];
     if (textFields.includes(field)) {
         const el = document.getElementById(field);
@@ -3136,9 +3160,8 @@ function applySuggestionChip(field, value) {
     }
 
     // For checkbox groups (with "Other" support)
-    const cbMap = { 'funding': 'fundingSources', 'activityTypes': 'activityTypes' };
-    const otherCbMap = { funding: { cbId: 'fundingOtherCb', groupId: 'fundingOtherGroup', inputId: 'fundingOther' },
-                         activityTypes: { cbId: 'activityOtherCb', groupId: 'activityOtherGroup', inputId: 'activityOther' } };
+    const cbMap = { 'funding': 'fundingSources' };
+    const otherCbMap = { funding: { cbId: 'fundingOtherCb', groupId: 'fundingOtherGroup', inputId: 'fundingOther' } };
     if (cbMap[field]) {
         const container = document.getElementById(cbMap[field]);
         if (container) {
@@ -3180,9 +3203,6 @@ function applySuggestionChip(field, value) {
     // For dynamic list fields — add as a new item
     const listFields = {
         'staffRoles':'staffRoles','partnerships':'partnerships','techAssets':'techAssets',
-        'activityDetails':'activityDetails','specificOutputs':'specificOutputs',
-        'shortKnowledge':'shortKnowledge','shortBehavior':'shortBehavior',
-        'medBehavior':'medBehavior','medSystemic':'medSystemic',
         'impactPopulation':'impactPopulation','impactSocietal':'impactSocietal',
         'assumptions':'assumptions','externalFactors':'externalFactors'
     };
@@ -3377,7 +3397,7 @@ function restoreFormData() {
             orgName:'orgName', mission:'mission', targetPop:'targetPop',
             programName:'programName', otherInputs:'otherInputs',
             dataCollection:'dataCollection',
-            shortFeedback:'shortFeedback', impactEvidence:'impactEvidence',
+            impactEvidence:'impactEvidence',
             coreProblem:'coreProblem', whyApproach:'whyApproach'
         };
         Object.entries(textMap).forEach(([key, id]) => {
@@ -3394,10 +3414,9 @@ function restoreFormData() {
             }
         });
 
-        // Restore checkboxes (with "Other" support for funding & activityTypes)
-        const cbMap = { funding:'fundingSources', activityTypes:'activityTypes' };
-        const otherTextMap = { funding: { cbId: 'fundingOtherCb', groupId: 'fundingOtherGroup', inputId: 'fundingOther' },
-                               activityTypes: { cbId: 'activityOtherCb', groupId: 'activityOtherGroup', inputId: 'activityOther' } };
+        // Restore checkboxes (with "Other" support for funding)
+        const cbMap = { funding:'fundingSources' };
+        const otherTextMap = { funding: { cbId: 'fundingOtherCb', groupId: 'fundingOtherGroup', inputId: 'fundingOther' } };
         Object.entries(cbMap).forEach(([key, containerId]) => {
             if (data[key] && data[key].length) {
                 const container = document.getElementById(containerId);
@@ -3426,9 +3445,6 @@ function restoreFormData() {
         // Restore dynamic lists
         const listMap = {
             staffRoles:'staffRoles', partnerships:'partnerships', techAssets:'techAssets',
-            activityDetails:'activityDetails', specificOutputs:'specificOutputs',
-            shortKnowledge:'shortKnowledge', shortBehavior:'shortBehavior',
-            medBehavior:'medBehavior', medSystemic:'medSystemic',
             impactPopulation:'impactPopulation', impactSocietal:'impactSocietal',
             assumptions:'assumptions', externalFactors:'externalFactors'
         };
@@ -3449,6 +3465,32 @@ function restoreFormData() {
                 }
             }
         });
+
+        // Restore logic chains
+        if (data.logicChains && data.logicChains.length) {
+            data.logicChains.forEach(chain => addLogicChain(chain));
+        } else if (!data.logicChains && (data.activityDetails?.length || data.specificOutputs?.length)) {
+            // Backward compatibility: synthesize chains from old separate fields
+            const maxLen = Math.max(
+                (data.activityDetails || []).length,
+                (data.specificOutputs || []).length,
+                (data.shortKnowledge || []).length,
+                (data.medBehavior || []).length
+            );
+            for (let i = 0; i < maxLen; i++) {
+                const chain = {
+                    activity: (data.activityDetails || [])[i] || '',
+                    activityType: (data.activityTypes || [])[i] || '',
+                    output: (data.specificOutputs || [])[i] || '',
+                    outputTarget: '',
+                    shortOutcome: (data.shortKnowledge || [])[i] || (data.shortBehavior || [])[i] || '',
+                    medOutcome: (data.medBehavior || [])[i] || (data.medSystemic || [])[i] || ''
+                };
+                if (chain.activity || chain.output || chain.shortOutcome || chain.medOutcome) {
+                    addLogicChain(chain);
+                }
+            }
+        }
 
         // Restore participant targets (paired rows)
         if (data.participantTargets && data.participantTargets.length) {
@@ -3550,7 +3592,7 @@ function scheduleAutoSave() {
 const _originalShowStep = showStep;
 showStep = function(step) {
     _originalShowStep(step);
-    if (AI.isActive && step < 8) {
+    if (AI.isActive && step < 6) {
         // Try restoring saved conversation first; if none, trigger fresh greeting
         if (!restoreConversationHistory(step)) {
             triggerStepGreeting(step);
@@ -3586,6 +3628,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Use the original showStep to avoid triggering AI greeting during init
             _originalShowStep(savedStep);
         }
+    }
+    // Seed initial chains if empty
+    if (!document.querySelectorAll('#logicChains .logic-chain-card').length) {
+        addLogicChain();
+        addLogicChain();
     }
     // Then init AI (which may restore conversation for the current step)
     initAI();
