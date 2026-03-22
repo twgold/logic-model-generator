@@ -490,10 +490,11 @@
             font-size: 0.72rem;
             line-height: 1.35;
             border-right: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
+            display: block;
             position: relative;
         }
+        .lm-chain-cell .cell-main { display: block; }
+        .lm-chain-cell .cell-sub { display: block; font-size: 0.6rem; color: var(--text-light); font-style: italic; margin-top: 0.15rem; }
         .lm-chain-cell:last-child {
             border-right: none;
         }
@@ -542,6 +543,27 @@
         }
         .toc-box h3 { font-size: 1rem; color: var(--primary); margin-bottom: 0.5rem; }
         .toc-box p { font-size: 0.9rem; line-height: 1.7; }
+
+        /* PROGRAM NARRATIVE */
+        .narrative-box {
+            margin-bottom: 1rem;
+            padding: 0.75rem 0;
+        }
+        .narrative-box strong { font-size: 0.95rem; color: var(--primary); display: block; margin-bottom: 0.3rem; }
+        .narrative-box p { font-size: 0.88rem; line-height: 1.7; color: var(--text); margin: 0; }
+        .narrative-box em { color: var(--primary); font-style: italic; }
+        .narrative-synthesis { border-top: 2px solid var(--border); padding-top: 1rem; margin-top: 0.5rem; }
+
+        /* MEASUREMENT TEASER */
+        .meas-teaser-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 0.75rem; }
+        .meas-teaser-table th { background: var(--primary); color: white; padding: 0.5rem 0.75rem; text-align: left; font-size: 0.8rem; font-weight: 600; }
+        .meas-teaser-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .meas-teaser-table tr:nth-child(even) td { background: #faf9f7; }
+        .meas-teaser-table .meas-stage { font-weight: 600; color: var(--primary); white-space: nowrap; width: 140px; }
+        .meas-teaser-table .meas-type-badge { display: inline-block; font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 600; }
+        .meas-teaser-table .meas-type-badge.quantitative { background: #e8f5e9; color: #2e7d32; }
+        .meas-teaser-table .meas-type-badge.qualitative { background: #fce4ec; color: #c62828; }
+        .meas-teaser-table .meas-type-badge.mixed { background: #f3e5f5; color: #6a1b9a; }
 
         /* DETAIL SECTIONS */
         .detail-section {
@@ -755,6 +777,13 @@
             .measure-type.mixed { background: #f4ecf7 !important; color: #8e44ad !important; }
             .measure-actions, .measure-add-btn, .measure-edit-form { display: none !important; }
 
+            /* Measurement teaser table */
+            .meas-teaser-table { font-size: 8.5pt !important; }
+            .meas-teaser-table th { background: #1E2A42 !important; color: white !important; font-size: 7.5pt !important; padding: 0.3rem 0.5rem !important; }
+            .meas-teaser-table td { padding: 0.3rem 0.5rem !important; font-size: 8.5pt !important; }
+            .meas-teaser-table .meas-stage { font-size: 8pt !important; }
+            .meas-type-badge { font-size: 6pt !important; }
+
             /* Section headers in print */
             #detailSections > h2, #measurementSuggestions > h2 {
                 font-size: 13pt !important; color: #1E2A42 !important;
@@ -772,6 +801,8 @@
             /* Page breaks */
             .logic-model-output { page-break-inside: avoid; }
             #tocOutput { page-break-before: always; }
+            #programNarrative { page-break-before: always; }
+            #programNarrative .narrative-box { page-break-inside: avoid; }
             #detailSections > h2 { page-break-before: always; }
             #measurementSuggestions { page-break-before: always; }
 
@@ -1560,6 +1591,9 @@
         <!-- THEORY OF CHANGE -->
         <div id="tocOutput"></div>
 
+        <!-- PROGRAM NARRATIVE -->
+        <div id="programNarrative"></div>
+
         <!-- DETAILED SECTIONS -->
         <div id="detailSections"></div>
 
@@ -1943,6 +1977,7 @@ function generateModel() {
 
     renderLogicModel(data);
     renderTheoryOfChange(data);
+    renderProgramNarrative(data);
     renderDetailSections(data);
     renderMeasurementSuggestions(data);
 
@@ -1982,10 +2017,10 @@ function renderLogicModel(data) {
 
     const chainRowsHtml = chains.length
         ? chains.map(c => `<div class="lm-chain-row">
-            <div class="lm-chain-cell">${esc(c.activity)}${c.activityType ? '<br><em style="font-size:0.6rem;color:var(--text-light);">' + esc(c.activityType) + '</em>' : ''}</div>
-            <div class="lm-chain-cell">${esc(c.output)}${c.outputTarget ? ' <strong>(' + esc(c.outputTarget) + ')</strong>' : ''}</div>
-            <div class="lm-chain-cell">${esc(c.shortOutcome)}</div>
-            <div class="lm-chain-cell">${esc(c.medOutcome)}</div>
+            <div class="lm-chain-cell"><span class="cell-main">${esc(c.activity)}</span>${c.activityType ? '<span class="cell-sub">' + esc(c.activityType) + '</span>' : ''}</div>
+            <div class="lm-chain-cell"><span class="cell-main">${esc(c.output)}</span>${c.outputTarget ? '<span class="cell-sub">Target: ' + esc(c.outputTarget) + '</span>' : ''}</div>
+            <div class="lm-chain-cell"><span class="cell-main">${esc(c.shortOutcome)}</span></div>
+            <div class="lm-chain-cell"><span class="cell-main">${esc(c.medOutcome)}</span></div>
           </div>`).join('')
         : '<div class="lm-chain-row"><div class="lm-chain-cell" style="grid-column:span 4;text-align:center;color:#bbb;font-style:italic;">No logic chains defined</div></div>';
 
@@ -2095,6 +2130,77 @@ function renderTheoryOfChange(data) {
     </div>`;
 }
 
+// ========== PROGRAM NARRATIVE ==========
+function renderProgramNarrative(data) {
+    const el = document.getElementById('programNarrative');
+    const chains = data.logicChains || [];
+    if (!chains.length || !chains.some(c => c.activity)) {
+        el.innerHTML = '';
+        return;
+    }
+
+    const orgName = data.orgName || 'The organization';
+
+    // Build chain-by-chain narrative paragraphs
+    const chainNarratives = chains
+        .filter(c => c.activity)
+        .map((c, i) => {
+            let para = `<div class="narrative-box"><strong>Chain ${i + 1}: ${esc(c.activity)}</strong>`;
+            para += `<p>`;
+            // Activity sentence
+            para += `Through ${c.activityType ? esc(c.activityType.toLowerCase()) + ' activities — specifically, ' : ''}`;
+            para += `<em>${esc(c.activity.toLowerCase())}</em>`;
+            // Output
+            if (c.output) {
+                para += `, ${esc(orgName)} produces <em>${esc(c.output.toLowerCase())}</em>`;
+                if (c.outputTarget) para += ` (target: ${esc(c.outputTarget)})`;
+            }
+            para += `. `;
+            // Short-term outcome
+            if (c.shortOutcome) {
+                para += `Within 1-3 years, this is expected to lead to <em>${esc(c.shortOutcome.toLowerCase())}</em>. `;
+            }
+            // Medium-term outcome
+            if (c.medOutcome) {
+                para += `Over the longer 3-5 year horizon, this contributes to <em>${esc(c.medOutcome.toLowerCase())}</em>.`;
+            }
+            para += `</p></div>`;
+            return para;
+        }).join('');
+
+    // Build synthesis paragraph
+    const impacts = [...(data.impactPopulation || []), ...(data.impactSocietal || [])].filter(Boolean);
+    const ptList = (data.participantTargets || []).filter(p => p.group);
+
+    let synthesis = `<div class="narrative-box narrative-synthesis"><strong>Bringing It Together</strong><p>`;
+    synthesis += `Across ${chains.filter(c => c.activity).length} interconnected program activit${chains.filter(c => c.activity).length === 1 ? 'y' : 'ies'}`;
+    if (ptList.length) {
+        synthesis += `, ${esc(orgName)} serves `;
+        synthesis += ptList.map(p => `<em>${esc(p.group.toLowerCase())}${p.target ? ' (' + esc(p.target) + ')' : ''}</em>`).join(' and ');
+    }
+    if (data.deliveryMode) {
+        synthesis += ` through a <em>${esc(data.deliveryMode.toLowerCase())}</em> delivery model`;
+    }
+    if (data.activityFrequency) {
+        synthesis += ` on a <em>${esc(data.activityFrequency.toLowerCase())}</em> basis`;
+    }
+    synthesis += `. `;
+    if (impacts.length) {
+        synthesis += `These efforts collectively build toward long-term impacts: <em>${impacts.map(i => esc(i.toLowerCase())).join('; ')}</em>.`;
+    } else {
+        synthesis += `These efforts collectively build toward lasting systemic change in the communities served.`;
+    }
+    synthesis += `</p></div>`;
+
+    el.innerHTML = `
+        <h2 style="font-size:1.2rem;margin:2rem 0 1rem;color:var(--primary);">Program Logic: How Change Happens</h2>
+        <div style="border-left:4px solid var(--accent);padding-left:1.2rem;">
+            ${chainNarratives}
+            ${synthesis}
+        </div>
+    `;
+}
+
 // ========== DETAIL SECTIONS ==========
 function renderDetailSections(data) {
     const el = document.getElementById('detailSections');
@@ -2185,272 +2291,103 @@ function buildQuantTargetsTable(targets) {
         </table>`;
 }
 
-// ========== MEASUREMENT SUGGESTIONS ==========
+// ========== MEASUREMENT FRAMEWORK TEASER ==========
 function renderMeasurementSuggestions(data) {
     const el = document.getElementById('measurementSuggestions');
-    window.currentMeasurements = generateMeasurementSuggestions(data);
-    renderMeasurementCards(el);
-}
+    const measures = generateMeasurementTeaser(data);
 
-function renderMeasurementCards(el) {
-    const suggestions = window.currentMeasurements;
     el.innerHTML = `
-        <h2 style="font-size:1.2rem;margin:2rem 0 0.5rem;color:var(--primary);">Recommended Measurement Framework</h2>
-        <p style="font-size:0.9rem;color:var(--text-light);margin-bottom:1rem;">Based on your logic model, here are suggested approaches for measuring your organization's success at each stage. You can edit, remove, or add your own measures.</p>
-        ${suggestions.map((cat, ci) => `
-            <div class="detail-section">
-                <h3 onclick="this.querySelector('.toggle').classList.toggle('open'); this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none';">
-                    <span>${cat.icon}</span>
-                    <span>${cat.title}</span>
-                    <span class="toggle open" style="margin-left:auto;">&#x25B6;</span>
-                </h3>
-                <div class="detail-content" id="measCat${ci}">
-                    ${cat.measures.map((m, mi) => renderMeasureCard(ci, mi, m)).join('')}
-                    <button class="add-btn measure-add-btn" onclick="addCustomMeasure(${ci})">+ Add Custom Measure</button>
-                </div>
-            </div>
-        `).join('')}
+        <h2 style="font-size:1.2rem;margin:2rem 0 0.5rem;color:var(--primary);">Measurement Framework Preview</h2>
+        <p style="font-size:0.9rem;color:var(--text-light);margin-bottom:1rem;">
+            Based on your logic model, here are key indicators to consider at each stage.
+            A comprehensive measurement framework and evaluation plan can be developed to fully operationalize these measures.
+        </p>
+        <table class="meas-teaser-table">
+            <thead>
+                <tr>
+                    <th>Stage</th>
+                    <th>Key Indicator</th>
+                    <th>Approach</th>
+                    <th style="width:80px;">Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${measures.map(m => `<tr>
+                    <td class="meas-stage">${m.stage}</td>
+                    <td><strong>${esc(m.name)}</strong></td>
+                    <td>${esc(m.approach)}</td>
+                    <td><span class="meas-type-badge ${m.type}">${m.type}</span></td>
+                </tr>`).join('')}
+            </tbody>
+        </table>
+        <div style="margin-top:1.5rem;padding:1rem;background:linear-gradient(135deg, #faf9f7 0%, #f2f0ec 100%);border-radius:8px;border-left:4px solid var(--accent);">
+            <p style="font-size:0.88rem;color:var(--text);margin:0;line-height:1.6;">
+                <strong>Next Step:</strong> These indicators represent starting points for a full evaluation framework.
+                A detailed measurement plan would include data collection instruments, sampling strategies,
+                analysis methods, reporting timelines, and stakeholder feedback loops tailored to your program.
+            </p>
+        </div>
     `;
 }
 
-function renderMeasureCard(ci, mi, m) {
-    return `<div class="measure-card" id="mc_${ci}_${mi}">
-        <div class="measure-actions">
-            <button class="measure-edit-btn" onclick="editMeasure(${ci},${mi})" title="Edit">&#x270F;&#xFE0F;</button>
-            <button class="measure-delete-btn" onclick="deleteMeasure(${ci},${mi})" title="Remove">&times;</button>
-        </div>
-        <span class="measure-type ${m.type}">${m.type}</span>
-        <h4>${esc(m.name)}</h4>
-        <p>${esc(m.description)}</p>
-    </div>`;
-}
+function generateMeasurementTeaser(data) {
+    const measures = [];
+    const chains = data.logicChains || [];
+    const ptGroups = (data.participantTargets || []).map(p => p.group).filter(Boolean);
 
-function editMeasure(ci, mi) {
-    const m = window.currentMeasurements[ci].measures[mi];
-    const card = document.getElementById('mc_' + ci + '_' + mi);
-    if (!card) return;
-    card.innerHTML = `
-        <div class="measure-edit-form">
-            <input type="text" class="me-name" value="${esc(m.name)}" placeholder="Measure name" style="font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;width:100%;padding:0.5rem;">
-            <select class="me-type" style="margin-bottom:0.4rem;padding:0.4rem;border-radius:6px;border:1px solid var(--border);">
-                <option value="quantitative" ${m.type==='quantitative'?'selected':''}>quantitative</option>
-                <option value="qualitative" ${m.type==='qualitative'?'selected':''}>qualitative</option>
-                <option value="mixed" ${m.type==='mixed'?'selected':''}>mixed</option>
-            </select>
-            <textarea class="me-desc" rows="3" style="width:100%;padding:0.5rem;font-size:0.85rem;">${esc(m.description)}</textarea>
-            <div style="display:flex;gap:0.5rem;margin-top:0.4rem;">
-                <button class="btn btn-primary" style="font-size:0.8rem;padding:0.4rem 1rem;" onclick="saveMeasure(${ci},${mi})">Save</button>
-                <button class="btn btn-secondary" style="font-size:0.8rem;padding:0.4rem 1rem;" onclick="cancelEditMeasure(${ci},${mi})">Cancel</button>
-            </div>
-        </div>`;
-}
-
-function saveMeasure(ci, mi) {
-    const card = document.getElementById('mc_' + ci + '_' + mi);
-    if (!card) return;
-    const name = card.querySelector('.me-name').value.trim();
-    const type = card.querySelector('.me-type').value;
-    const desc = card.querySelector('.me-desc').value.trim();
-    if (!name) return;
-    window.currentMeasurements[ci].measures[mi] = { name, type, description: desc };
-    card.outerHTML = renderMeasureCard(ci, mi, window.currentMeasurements[ci].measures[mi]);
-}
-
-function cancelEditMeasure(ci, mi) {
-    const card = document.getElementById('mc_' + ci + '_' + mi);
-    if (!card) return;
-    card.outerHTML = renderMeasureCard(ci, mi, window.currentMeasurements[ci].measures[mi]);
-}
-
-function deleteMeasure(ci, mi) {
-    if (!confirm('Remove this measure?')) return;
-    window.currentMeasurements[ci].measures.splice(mi, 1);
-    // Re-render just this category
-    const catEl = document.getElementById('measCat' + ci);
-    if (catEl) {
-        const cat = window.currentMeasurements[ci];
-        catEl.innerHTML = cat.measures.map((m, i) => renderMeasureCard(ci, i, m)).join('') +
-            `<button class="add-btn measure-add-btn" onclick="addCustomMeasure(${ci})">+ Add Custom Measure</button>`;
-    }
-}
-
-function addCustomMeasure(ci) {
-    const newMeasure = { name: 'New Measure', type: 'mixed', description: 'Describe this measure...' };
-    window.currentMeasurements[ci].measures.push(newMeasure);
-    const mi = window.currentMeasurements[ci].measures.length - 1;
-    const catEl = document.getElementById('measCat' + ci);
-    if (catEl) {
-        const addBtn = catEl.querySelector('.measure-add-btn');
-        addBtn.insertAdjacentHTML('beforebegin', renderMeasureCard(ci, mi, newMeasure));
-        editMeasure(ci, mi);
-    }
-}
-
-function generateMeasurementSuggestions(data) {
-    const suggestions = [];
-
-    // OUTPUT MEASURES
-    const outputMeasures = [];
-    const ptGroups = (data.participantTargets || []).map(p => p.group);
-    const ptSummary = (data.participantTargets || []).map(p => p.target ? `${p.target} ${p.group.toLowerCase()}` : p.group.toLowerCase()).join(', ');
-    if (ptGroups.length) {
-        outputMeasures.push({
-            name: 'Participant Reach Tracking',
-            type: 'quantitative',
-            description: `Track the number of ${ptGroups.join(', ').toLowerCase()} served per program cycle. Use registration databases and attendance logs. Compare against your targets: ${ptSummary || 'your annual goal'}.`
-        });
-    }
-    if (data.specificOutputs.length) {
-        outputMeasures.push({
-            name: 'Activity Completion Dashboard',
-            type: 'quantitative',
-            description: `Monitor completion metrics: ${data.specificOutputs.slice(0,3).join('; ')}. Build a dashboard updated monthly to track progress toward annual targets.`
-        });
-    }
-    outputMeasures.push({
-        name: 'Dosage & Fidelity Tracking',
-        type: 'quantitative',
-        description: `Track participant attendance rates and program completion percentages. Measure "dosage" (how much of the program each participant receives) to understand the relationship between engagement and outcomes.`
-    });
-    if (data.dataCollection) {
-        outputMeasures.push({
-            name: 'Data Quality Audit',
-            type: 'mixed',
-            description: `Regularly audit your data collection methods (${data.dataCollection}) to ensure accuracy and completeness. Establish data validation protocols and train staff on consistent data entry.`
-        });
-    }
-    suggestions.push({ icon: '&#x1f4c8;', title: 'Output Measures (Activity Tracking)', measures: outputMeasures });
-
-    // CHAIN-SPECIFIC OUTCOME MEASURES
-    if (data.logicChains && data.logicChains.length) {
-        const chainMeasures = [];
-        data.logicChains.forEach((c, i) => {
-            if (c.shortOutcome && c.activity) {
-                chainMeasures.push({
-                    name: `Chain ${i+1}: ${c.shortOutcome.substring(0, 50)}${c.shortOutcome.length > 50 ? '...' : ''}`,
-                    type: 'mixed',
-                    description: `Track progress on "${c.shortOutcome}" resulting from "${c.activity}". ${c.outputTarget ? 'Monitor whether achieving the output target (' + c.outputTarget + ') correlates with this outcome.' : ''} Use pre/post assessments or surveys to measure change. ${c.medOutcome ? 'Long-term, assess whether this leads to "' + c.medOutcome + '".' : ''}`
-                });
-            }
-        });
-        if (chainMeasures.length) {
-            suggestions.push({ icon: '&#x1f517;', title: 'Chain-Specific Outcome Measures', measures: chainMeasures });
-        }
-    }
-
-    // SHORT-TERM OUTCOME MEASURES
-    const shortMeasures = [];
-    if (data.shortKnowledge.length) {
-        shortMeasures.push({
-            name: 'Pre/Post Knowledge Assessments',
-            type: 'quantitative',
-            description: `Administer validated pre- and post-assessments to measure changes in knowledge related to: ${data.shortKnowledge.slice(0,2).join('; ')}. Use standardized rubrics for consistent scoring.`
-        });
-    }
-    if (data.shortBehavior.length) {
-        shortMeasures.push({
-            name: 'Behavioral Observation Protocols',
-            type: 'qualitative',
-            description: `Develop structured observation checklists to document behavioral changes: ${data.shortBehavior.slice(0,2).join('; ')}. Train observers for inter-rater reliability.`
-        });
-    }
-    shortMeasures.push({
-        name: 'Participant Satisfaction Surveys',
-        type: 'mixed',
-        description: `Deploy end-of-program surveys combining Likert scales (quantitative) with open-ended feedback (qualitative). Track Net Promoter Score (NPS) as a benchmark. ${data.shortFeedback ? 'Build on your planned approach: ' + data.shortFeedback : ''}`
-    });
-    shortMeasures.push({
-        name: 'Focus Groups & Interviews',
-        type: 'qualitative',
-        description: `Conduct quarterly focus groups with ${ptGroups.slice(0,2).join(' and ').toLowerCase() || 'participants'} to gather rich, contextual feedback on program experience, perceived value, and areas for improvement.`
-    });
-    suggestions.push({ icon: '&#x1f31f;', title: 'Short-Term Outcome Measures (1-3 Years)', measures: shortMeasures });
-
-    // MEDIUM-TERM OUTCOME MEASURES
-    const medMeasures = [];
-    if (data.medBehavior.length) {
-        medMeasures.push({
-            name: 'Longitudinal Follow-up Surveys',
-            type: 'quantitative',
-            description: `Survey program alumni at 6-month, 1-year, and 3-year intervals to assess sustained changes: ${data.medBehavior.slice(0,2).join('; ')}. Track retention and continuation of practices.`
-        });
-    }
-    if (data.medSystemic.length) {
-        medMeasures.push({
-            name: 'Organizational Change Indicators',
-            type: 'mixed',
-            description: `Develop indicators to track systemic changes: ${data.medSystemic.slice(0,2).join('; ')}. Use annual partner surveys combined with policy/document review.`
-        });
-    }
-    medMeasures.push({
-        name: 'Case Studies',
-        type: 'qualitative',
-        description: `Develop 3-5 in-depth case studies annually documenting the journey of representative participants or partner organizations. Capture both successes and challenges to inform program refinement.`
-    });
-    medMeasures.push({
-        name: 'Comparison/Benchmarking Analysis',
-        type: 'quantitative',
-        description: `Compare your participants' outcomes against relevant benchmarks (state/national averages, comparison groups, industry standards) to establish evidence that your program makes a difference beyond what would have happened anyway.`
-    });
-    suggestions.push({ icon: '&#x1f4a1;', title: 'Medium-Term Outcome Measures (3-5 Years)', measures: medMeasures });
-
-    // IMPACT MEASURES
-    const impactMeasures = [];
-    if (data.impactPopulation.length) {
-        impactMeasures.push({
-            name: 'Population-Level Data Analysis',
-            type: 'quantitative',
-            description: `Track large-scale indicators related to: ${data.impactPopulation.join('; ')}. Partner with research institutions to analyze longitudinal data and establish causal linkages where possible.`
-        });
-    }
-    if (data.impactSocietal.length) {
-        impactMeasures.push({
-            name: 'Community-Level Impact Assessment',
-            type: 'mixed',
-            description: `Conduct periodic community-level assessments to measure progress toward: ${data.impactSocietal.join('; ')}. Use both quantitative indicators (census data, economic metrics) and qualitative community voice.`
-        });
-    }
-    impactMeasures.push({
-        name: 'Cost-Effectiveness / ROI Analysis',
-        type: 'quantitative',
-        description: `Calculate the return on investment by comparing program costs against the economic and social value generated. Consider cost per participant, cost per outcome achieved, and long-term economic benefits.`
-    });
-    impactMeasures.push({
-        name: 'External Evaluation',
-        type: 'mixed',
-        description: `Engage an external evaluator to conduct an independent assessment of your program's effectiveness. This provides credibility with funders and stakeholders, and identifies blind spots in your internal evaluation.`
-    });
-    suggestions.push({ icon: '&#x1f30d;', title: 'Long-Term Impact Measures (5+ Years)', measures: impactMeasures });
-
-    // EVALUATION INFRASTRUCTURE
-    suggestions.push({
-        icon: '&#x1f6e0;&#xFE0F;',
-        title: 'Evaluation Infrastructure Recommendations',
-        measures: [
-            {
-                name: 'Build an Evaluation Calendar',
-                type: 'mixed',
-                description: 'Create an annual evaluation calendar that maps data collection activities to your program cycle. Include pre/post assessments, surveys, focus groups, and reporting deadlines.'
-            },
-            {
-                name: 'Invest in Data Systems',
-                type: 'quantitative',
-                description: `Establish or strengthen data management systems to centralize your metrics. ${data.dataCollection ? 'Build on your current approach (' + data.dataCollection + ') ' : ''}Consider a centralized dashboard that tracks outputs and outcomes in real-time.`
-            },
-            {
-                name: 'Develop a Learning Agenda',
-                type: 'qualitative',
-                description: 'Create a learning agenda that identifies 3-5 key evaluation questions your organization wants to answer each year. This focuses your evaluation efforts and ensures data is used for continuous improvement, not just reporting.'
-            },
-            {
-                name: 'Stakeholder Feedback Loops',
-                type: 'mixed',
-                description: `Establish regular feedback mechanisms with ${ptGroups.join(', ').toLowerCase() || 'your target audience'}, staff, and partners. Use findings to adapt your logic model as you learn what works.`
-            }
-        ]
+    // 1. Output tracking
+    const outputs = chains.map(c => c.output).filter(Boolean);
+    measures.push({
+        stage: 'Outputs',
+        name: 'Activity Completion & Reach',
+        approach: outputs.length
+            ? 'Track completion of ' + outputs.slice(0, 2).join(', ') + (ptGroups.length ? ' and participant reach across ' + ptGroups.join(', ').toLowerCase() : '')
+            : 'Track program delivery metrics and participant reach using registration and attendance data',
+        type: 'quantitative'
     });
 
-    return suggestions;
+    // 2. Short-term outcome (from first chain with shortOutcome)
+    const firstShort = chains.find(c => c.shortOutcome);
+    measures.push({
+        stage: 'Short-term (1-3 yr)',
+        name: 'Pre/Post Outcome Assessment',
+        approach: firstShort
+            ? 'Measure changes such as "' + firstShort.shortOutcome + '" using validated pre- and post-assessments'
+            : 'Administer pre/post assessments to measure knowledge, attitude, or behavioral changes',
+        type: 'quantitative'
+    });
+
+    // 3. Participant experience
+    measures.push({
+        stage: 'Short-term (1-3 yr)',
+        name: 'Participant Feedback',
+        approach: 'Combine satisfaction surveys with focus groups to capture both quantitative ratings and qualitative insights',
+        type: 'mixed'
+    });
+
+    // 4. Medium-term outcome
+    const firstMed = chains.find(c => c.medOutcome);
+    measures.push({
+        stage: 'Medium-term (3-5 yr)',
+        name: 'Longitudinal Follow-up',
+        approach: firstMed
+            ? 'Survey alumni at intervals to assess sustained change toward "' + firstMed.medOutcome + '"'
+            : 'Track program alumni at 6-month, 1-year, and 3-year intervals to assess lasting change',
+        type: 'quantitative'
+    });
+
+    // 5. Long-term impact
+    const impacts = [...(data.impactPopulation || []), ...(data.impactSocietal || [])].filter(Boolean);
+    measures.push({
+        stage: 'Impact (5+ yr)',
+        name: 'Population-Level Indicators',
+        approach: impacts.length
+            ? 'Track large-scale indicators related to ' + impacts.slice(0, 2).join('; ').toLowerCase()
+            : 'Partner with research institutions to analyze population-level data and establish causal linkages',
+        type: 'mixed'
+    });
+
+    return measures;
 }
 
 // ========== UTILITIES ==========
