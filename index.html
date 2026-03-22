@@ -1601,11 +1601,17 @@ function prevStep() {
 }
 
 function showStep(step) {
+    // Clamp to valid range to prevent blank page
+    if (step < 0 || step >= totalSteps) step = 0;
     document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
     const target = document.getElementById('step-' + step);
     if (target) {
         target.classList.add('active');
         target.querySelector('.card')?.classList.add('fade-in');
+    } else {
+        // Fallback: show step 0 if target doesn't exist
+        document.getElementById('step-0')?.classList.add('active');
+        step = 0;
     }
 
     // Update progress dots
@@ -3623,7 +3629,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Restore form data first
     const restored = restoreFormData();
     if (restored) {
-        const savedStep = parseInt(localStorage.getItem('lm_current_step') || '0');
+        let savedStep = parseInt(localStorage.getItem('lm_current_step') || '0');
+        // Clamp to valid range (handles old 8-step version data)
+        if (savedStep < 0 || savedStep >= totalSteps) savedStep = 0;
         if (savedStep > 0) {
             // Use the original showStep to avoid triggering AI greeting during init
             _originalShowStep(savedStep);
