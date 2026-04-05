@@ -464,7 +464,7 @@
             gap: 0;
         }
         .lm-col-header {
-            padding: 0.7rem 0.5rem;
+            padding: 0.5rem 0.5rem 0.4rem;
             text-align: center;
             font-weight: 700;
             font-size: 0.75rem;
@@ -473,11 +473,12 @@
             letter-spacing: 0.5px;
         }
         .lm-col-question {
-            text-align: center;
+            display: block;
             font-size: 0.65rem;
             color: rgba(255,255,255,0.8);
             font-style: italic;
-            padding: 0 0.3rem 0.5rem;
+            font-weight: 400;
+            margin-top: 0.15rem;
         }
         .lm-chain-row {
             display: grid;
@@ -682,10 +683,11 @@
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                min-height: 90vh;
+                min-height: 0;
+                height: auto;
                 text-align: center;
                 page-break-after: always;
-                padding: 2in 1in;
+                padding: 3in 1in 2in;
             }
             .print-title-page .print-title-bar {
                 width: 80px; height: 4px; background: #1E2A42;
@@ -1968,6 +1970,8 @@ function generateModel() {
     // Hide wizard, show results
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('progressBar').style.display = 'none';
+    document.getElementById('appShell').style.display = 'none';
+    document.querySelector('.header').style.display = 'none';
     document.getElementById('aiCoachSidebar')?.classList.add('ai-sidebar--hidden');
     document.getElementById('aiFab')?.classList.remove('visible');
     document.getElementById('resultsContainer').classList.add('active');
@@ -2039,22 +2043,20 @@ function renderLogicModel(data) {
         <div style="text-align:center;font-size:0.8rem;color:var(--text-light);margin-bottom:1rem;font-style:italic;max-width:600px;margin-left:auto;margin-right:auto;">"${esc(data.mission)}"</div>
         <div class="lm-connected-grid">
             <div class="lm-bookend">
-                <div class="lm-col-header" style="background:#1E2A42;">Inputs</div>
-                <div class="lm-col-question" style="background:#1E2A42;">What do we need?</div>
+                <div class="lm-col-header" style="background:#1E2A42;">Inputs<span class="lm-col-question">What do we need?</span></div>
                 <div class="lm-col-body"><ul>${inputsHtml}</ul></div>
             </div>
             <div class="lm-chain-area">
                 <div class="lm-chain-headers">
-                    <div><div class="lm-col-header" style="background:#2C3E5A;">Activities</div><div class="lm-col-question" style="background:#2C3E5A;">What do we do?</div></div>
-                    <div><div class="lm-col-header" style="background:#3A5070;">Outputs</div><div class="lm-col-question" style="background:#3A5070;">What do we measure?</div></div>
-                    <div><div class="lm-col-header" style="background:#D4644A;">Short-term</div><div class="lm-col-question" style="background:#D4644A;">1-3 Years</div></div>
-                    <div><div class="lm-col-header" style="background:#B8533D;">Med-term</div><div class="lm-col-question" style="background:#B8533D;">3-5 Years</div></div>
+                    <div class="lm-col-header" style="background:#2C3E5A;">Activities<span class="lm-col-question">What do we do?</span></div>
+                    <div class="lm-col-header" style="background:#3A5070;">Outputs<span class="lm-col-question">What do we measure?</span></div>
+                    <div class="lm-col-header" style="background:#D4644A;">Short-term<span class="lm-col-question">1-3 Years</span></div>
+                    <div class="lm-col-header" style="background:#B8533D;">Med-term<span class="lm-col-question">3-5 Years</span></div>
                 </div>
                 ${chainRowsHtml}
             </div>
             <div class="lm-bookend">
-                <div class="lm-col-header" style="background:#27ae60;">Impacts</div>
-                <div class="lm-col-question" style="background:#27ae60;">5+ Years</div>
+                <div class="lm-col-header" style="background:#27ae60;">Impacts<span class="lm-col-question">5+ Years</span></div>
                 <div class="lm-col-body"><ul>${impactsHtml}</ul></div>
             </div>
         </div>
@@ -2425,6 +2427,8 @@ function startOver() {
     document.getElementById('resultsContainer').classList.remove('active');
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('progressBar').style.display = 'block';
+    document.getElementById('appShell').style.display = '';
+    document.querySelector('.header').style.display = '';
     if (AI.isActive) showSidebar();
     showStep(0);
 }
@@ -3232,6 +3236,8 @@ async function generateWithAI() {
 function renderEnhancedResults(data, aiResult) {
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('progressBar').style.display = 'none';
+    document.getElementById('appShell').style.display = 'none';
+    document.querySelector('.header').style.display = 'none';
     document.getElementById('aiCoachSidebar')?.classList.add('ai-sidebar--hidden');
     document.getElementById('aiFab')?.classList.remove('visible');
     document.getElementById('resultsContainer').classList.add('active');

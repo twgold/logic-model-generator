@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "logic-model",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-l", "8765", "-s"],
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "export NVM_DIR=\"$HOME/.nvm\" && . \"$NVM_DIR/nvm.sh\" && npx serve -l 8765 -s"],
       "port": 8765
     }
   ]
